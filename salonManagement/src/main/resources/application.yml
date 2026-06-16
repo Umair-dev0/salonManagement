@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: salonManagement
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/salon_db
+    username: postgres
+    password: umair

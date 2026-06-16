@@ -9,7 +9,7 @@ public class SalonManagementApplication {
 	public static void main(String[] args) {
 
         SpringApplication.run(SalonManagementApplication.class, args);
-        System.out.println("Hello From Umair...");
+        System.out.println("Hello From Umair Sanderwale...");
 	}
 
 }

@@ -10,6 +10,8 @@ public class SalonManagementApplication {
 
         SpringApplication.run(SalonManagementApplication.class, args);
         System.out.println("Hello From Umair Sanderwale...!!!");
+        System.out.println("Hello From Sufiyan Sanderwale...!!!");
+
 
 	}
 

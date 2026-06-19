@@ -16,6 +16,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
     public ApiResponse<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
         // Validation pass hone ke baad, request Service layer me jayegi
         UserResponse response = userService.createUser(request);

@@ -1,6 +1,7 @@
 package com.example.salonManagement.user;
 
 import com.example.salonManagement.common.exception.ConflictException;
+import com.example.salonManagement.common.exception.NotFoundException;
 import com.example.salonManagement.user.dto.UserRequest;
 import com.example.salonManagement.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,58 @@ public class UserService {
 
         // 5. Convert back to Response DTO
         return UserResponse.from(savedUser);
+    }
+
+    // NAYA CODE: Update User
+    @Transactional
+    public UserResponse updateUser(Long id, UserRequest request) {
+        // Pehle check karo user exist karta hai ya nahi
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+
+        // Agar naya phone number aaya hai, toh duplicate check karo (current user ko chhod kar)
+        if (request.phone() != null && !request.phone().equals(user.getPhone())) {
+            userRepository.findByPhone(request.phone()).ifPresent(u -> {
+                throw new ConflictException("Phone number already exists: " + request.phone());
+            });
+        }
+
+        // Details update karo
+        user.setFullName(request.fullName());
+        user.setPhone(request.phone());
+        user.setRole(request.role());
+        user.setSpecialization(request.specialization());
+
+        User updatedUser = userRepository.save(user);
+        return UserResponse.from(updatedUser);
+    }
+
+    // NAYA CODE: Soft Delete User
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+
+        // Hard delete (repository.delete) ki jagah sirf flag false karenge
+        user.setActive(false);
+        userRepository.save(user);
+    }
+
+    // NAYA CODE: Get All Users
+    @Transactional(readOnly = true)
+    public java.util.List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserResponse::from) // Entity ko Response DTO me convert kar rahe hain
+                .toList();
+    }
+
+    // NAYA CODE: Get Single User By ID
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+
+        return UserResponse.from(user);
     }
 
 }

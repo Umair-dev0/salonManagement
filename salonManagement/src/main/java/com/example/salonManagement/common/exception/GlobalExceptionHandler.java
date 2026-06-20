@@ -56,7 +56,20 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse<?> genericError(Exception e) {
         // Logging is handled by Spring, return safe clean message to avoid leaking stack traces
+        e.printStackTrace();
         return ApiResponse.error("An unexpected error occurred");
+
     }
+    @ExceptionHandler(org.springframework.security.authentication.DisabledException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiResponse<?> disabledUser(org.springframework.security.authentication.DisabledException e) {
+        return ApiResponse.error("Your account has been disabled or deleted. Please contact the administrator.");
+    }
+//    // Spring Security ke login errors (galat password/email) ko handle karne ke liye
+//    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+//    public org.springframework.http.ResponseEntity<ApiResponse<Void>> handleBadCredentialsException(org.springframework.security.authentication.BadCredentialsException ex) {
+//        ApiResponse<Void> response = ApiResponse.error("Invalid email or password");
+//        return new org.springframework.http.ResponseEntity<>(response, org.springframework.http.HttpStatus.UNAUTHORIZED);
+//    }
 }
 

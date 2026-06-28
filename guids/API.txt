@@ -1,0 +1,33 @@
+1.Show all the Users(if loged in) GET----> http://localhost:8080/api/users 
+
+2.Login (Generate JWT Token) POST ----> http://localhost:8080/api/auth/login
+{
+  "email": "umair@salon.com",
+  "password": "supersecretpassword"
+}
+
+3.(Get Single User By ID ) GET ---->http://localhost:8080/api/users/1
+
+4.(Update User Details) PUT ----> http://localhost:8080/api/users/5
+{
+  "fullName": "Sufiyan Updated",
+  "email": "sufiyan@salon.com",
+  "phone": "1122334455",
+  "password": "supersecret",
+  "role": "OWNER",
+  "specialization": "Management"
+}
+
+5.Delete User (Soft Delete)DELETE---->http://localhost:8080/api/users/5
+
+6.Get My Profile (Me) GET--->http://localhost:8080/api/auth/me
+
+7.(Create a New User) POST --->http://localhost:8080/api/users
+{
+  "fullName": "Zaki Sanderwale",
+  "email": "zaki2@salon.com",
+  "phone": "9988776655",
+  "password": "supersecret",
+  "role": "THERAPIST",
+  "specialization": "Haircut"
+}

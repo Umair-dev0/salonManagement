@@ -42,7 +42,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
 
           <Route
-            path="/dashboard"
+            path="/dashboard/*"
             element={
               <ProtectedRoute allow={['OWNER', 'MANAGER', 'FRONT_DESK', 'THERAPIST', 'ADMIN']}>
                 <DashboardRouter />

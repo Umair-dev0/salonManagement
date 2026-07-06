@@ -1,10 +1,11 @@
-import React from 'react';
-import { CalendarCheck, Star, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CalendarCheck, Star, Bell, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './Dashboard.css';
 
 export default function TherapistDashboard() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <div className="dashboard-layout">
@@ -17,6 +18,18 @@ export default function TherapistDashboard() {
                 <div className="nav-menu">
                     <div className="nav-item active"><CalendarCheck className="nav-icon" size={20} /> My Appointments</div>
                     <div className="nav-item"><Star className="nav-icon" size={20} /> My Performance</div>
+                </div>
+
+                <div className="sidebar-bottom">
+                    <div
+                        className="nav-item text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                        onClick={() => {
+                            logout();
+                            navigate('/login');
+                        }}
+                    >
+                        <LogOut className="nav-icon text-red-500" size={20} /> Logout
+                    </div>
                 </div>
             </div>
 

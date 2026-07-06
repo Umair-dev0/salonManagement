@@ -17,6 +17,14 @@ public class UserService {
 
     @Transactional
     public UserResponse createUser(UserRequest request) {
+        // Manual validation for required fields at creation
+        if (request.email() == null || request.email().isBlank()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        if (request.password() == null || request.password().isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+
         // 1. Check for duplicate email
         userRepository.findByEmail(request.email()).ifPresent(u -> {
             throw new ConflictException("Email already exists: " + request.email());
@@ -68,6 +76,11 @@ public class UserService {
         user.setPhone(request.phone());
         user.setRole(request.role());
         user.setSpecialization(request.specialization());
+
+        // Update password if a new one is provided (not blank)
+        if (request.password() != null && !request.password().isBlank()) {
+            user.setPasswordHash(passwordEncoder.encode(request.password()));
+        }
 
         User updatedUser = userRepository.save(user);
         return UserResponse.from(updatedUser);

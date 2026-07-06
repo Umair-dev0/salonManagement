@@ -598,3 +598,76 @@
 }
 
 /*Only staff creation delelition updating end*/
+
+/* ==========================================
+   SERVICE CATALOG MODALS STYLING (CRITICAL FIX)
+   ========================================== */
+
+.catalog-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Exceed header and sidebar layers */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.catalog-modal-content {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 800px; /* Target responsive width (700-900px) */
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: catalogModalScale 0.15s ease-out;
+}
+
+@keyframes catalogModalScale {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.catalog-modal-header {
+    background-color: #1c1b1b;
+    color: #ffffff;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.catalog-modal-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.catalog-modal-form {
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: calc(90vh - 80px); /* Internal scrolling support */
+    box-sizing: border-box;
+}
+
+/* Category modal can be narrower */
+.catalog-modal-content.category-modal {
+    max-width: 500px;
+}

@@ -68,7 +68,8 @@ export default function LoginPage() {
             {/* Left Side - Image & Tagline */}
             <div className="login-left-panel">
                 <img
-                    src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&q=80&w=2000"
+                    // src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&q=80&w=2000"
+                    src="\public\Login.png"
                     alt="Salon Interior"
                     className="login-image"
                 />

@@ -1,15 +1,32 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard, Calendar, Users, Briefcase,
     Scissors, BarChart3, Settings, HelpCircle,
-    Search, Bell, UserPlus, X, Edit, Trash2
+    Search, Bell, UserPlus, X, Edit, Trash2, LogOut
 } from 'lucide-react';
 import api from '../../api/axiosClient'; // Aapka setup kiya hua axios interceptor
 import './Dashboard.css';
+import ServiceCatalogTab from '../services/ServiceCatalogTab';
+import { useAuth } from '../../context/AuthContext';
 
 export default function OwnerDashboard() {
-    // Navigation State
-    const [activeTab, setActiveTab] = useState('DASHBOARD');
+    const { logout } = useAuth();
+    // Navigation State driven by URL path
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Map path to active tab
+    const getActiveTabFromPath = (path) => {
+        if (path.endsWith('/staff')) return 'STAFF';
+        if (path.endsWith('/service-catalogue')) return 'SERVICES';
+        if (path.endsWith('/calendar')) return 'CALENDAR';
+        if (path.endsWith('/reports')) return 'REPORTS';
+        if (path.endsWith('/settings')) return 'SETTINGS';
+        return 'DASHBOARD';
+    };
+
+    const activeTab = getActiveTabFromPath(location.pathname);
 
     // Staff State
     const [staffs, setStaffs] = useState([]);
@@ -71,7 +88,15 @@ export default function OwnerDashboard() {
             setIsModalOpen(false);
             fetchStaffs(); // Refresh the list
         } catch (error) {
-            alert(error.response?.data?.message || "Something went wrong!");
+            const responseData = error.response?.data;
+            if (responseData?.errors) {
+                const validationErrors = Object.entries(responseData.errors)
+                    .map(([field, msg]) => `${field}: ${msg}`)
+                    .join('\n');
+                alert(`Validation failed:\n${validationErrors}`);
+            } else {
+                alert(responseData?.message || "Something went wrong!");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -133,23 +158,52 @@ export default function OwnerDashboard() {
                 <div className="nav-menu">
                     <div
                         className={`nav-item ${activeTab === 'DASHBOARD' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('DASHBOARD')}
+                        onClick={() => navigate('/dashboard')}
                     >
                         <LayoutDashboard className="nav-icon" size={20} /> Dashboard
                     </div>
                     <div
                         className={`nav-item ${activeTab === 'STAFF' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('STAFF')}
+                        onClick={() => navigate('/dashboard/staff')}
                     >
                         <Briefcase className="nav-icon" size={20} /> Staff Management
                     </div>
-                    {/* Other tabs can be added here later */}
-                    <div className="nav-item"><Calendar className="nav-icon" size={20} /> Calendar</div>
-                    <div className="nav-item"><BarChart3 className="nav-icon" size={20} /> Reports</div>
+                    <div
+                        className={`nav-item ${activeTab === 'SERVICES' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/service-catalogue')}
+                    >
+                        <Scissors className="nav-icon" size={20} /> Service Catalogue
+                    </div>
+                    <div
+                        className={`nav-item ${activeTab === 'CALENDAR' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/calendar')}
+                    >
+                        <Calendar className="nav-icon" size={20} /> Calendar
+                    </div>
+                    <div
+                        className={`nav-item ${activeTab === 'REPORTS' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/reports')}
+                    >
+                        <BarChart3 className="nav-icon" size={20} /> Reports
+                    </div>
                 </div>
 
                 <div className="sidebar-bottom">
-                    <div className="nav-item"><Settings className="nav-icon" size={20} /> Settings</div>
+                    <div
+                        className={`nav-item ${activeTab === 'SETTINGS' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/settings')}
+                    >
+                        <Settings className="nav-icon" size={20} /> Settings
+                    </div>
+                    <div
+                        className="nav-item text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                        onClick={() => {
+                            logout();
+                            navigate('/login');
+                        }}
+                    >
+                        <LogOut className="nav-icon text-red-500" size={20} /> Logout
+                    </div>
                 </div>
             </div>
 
@@ -228,6 +282,55 @@ export default function OwnerDashboard() {
                                     ))}
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {activeTab === 'SERVICES' && (
+                        <ServiceCatalogTab />
+                    )}
+
+                    {activeTab === 'CALENDAR' && (
+                        <div>
+                            <div className="page-header">
+                                <div className="greeting">
+                                    <h1>Calendar</h1>
+                                    <p>View daily schedules and bookings.</p>
+                                </div>
+                            </div>
+                            <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
+                                <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>Calendar Coming Soon</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>This section is currently being integrated with salon booking engines.</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'REPORTS' && (
+                        <div>
+                            <div className="page-header">
+                                <div className="greeting">
+                                    <h1>Reports</h1>
+                                    <p>Analyze performance, sales, and statistics.</p>
+                                </div>
+                            </div>
+                            <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
+                                <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>Analytics & Reports Coming Soon</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Sales and receptionist dashboards will populate data here shortly.</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'SETTINGS' && (
+                        <div>
+                            <div className="page-header">
+                                <div className="greeting">
+                                    <h1>Settings</h1>
+                                    <p>Configure salon profile, rules, and security.</p>
+                                </div>
+                            </div>
+                            <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
+                                <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>Settings Configuration Coming Soon</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Salon hours, taxes, and profile customizations will be editable here.</p>
+                            </div>
                         </div>
                     )}
 

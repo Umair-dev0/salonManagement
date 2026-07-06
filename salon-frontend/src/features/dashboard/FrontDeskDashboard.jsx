@@ -1,10 +1,11 @@
-import React from 'react';
-import { LayoutDashboard, CalendarDays, Users, Receipt, Bell, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { LayoutDashboard, CalendarDays, Users, Receipt, Bell, Search, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './Dashboard.css';
 
 export default function FrontDeskDashboard() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <div className="dashboard-layout">
@@ -19,6 +20,18 @@ export default function FrontDeskDashboard() {
                     <div className="nav-item"><CalendarDays className="nav-icon" size={20} /> Bookings</div>
                     <div className="nav-item"><Users className="nav-icon" size={20} /> Walk-ins & Clients</div>
                     <div className="nav-item"><Receipt className="nav-icon" size={20} /> Billing & POS</div>
+                </div>
+
+                <div className="sidebar-bottom">
+                    <div
+                        className="nav-item text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                        onClick={() => {
+                            logout();
+                            navigate('/login');
+                        }}
+                    >
+                        <LogOut className="nav-icon text-red-500" size={20} /> Logout
+                    </div>
                 </div>
             </div>
 

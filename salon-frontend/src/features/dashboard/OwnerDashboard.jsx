@@ -2,12 +2,48 @@ import React, { useState, useEffect } from 'react';
 import {
     LayoutDashboard, Calendar, Users, Briefcase,
     Scissors, BarChart3, Settings, HelpCircle,
-    Search, Bell, UserPlus, X, Edit, Trash2
+    Search, Bell, UserPlus, X, Edit, Trash2,
+    Mail, Phone, Award, Shield, LogOut, Sparkles
 } from 'lucide-react';
 import api from '../../api/axiosClient'; // Aapka setup kiya hua axios interceptor
 import './Dashboard.css';
+import ServiceCatalogPage from '../services/ServiceCatalogPage';
+import ComboPackagesPage from '../services/ComboPackagesPage';
+import { useAuth } from '../../context/AuthContext';
+
+
+
+// Skeleton Loader component for smooth staff loading
+const StaffSkeleton = () => (
+    <div className="staff-grid">
+        {[1, 2, 3, 4].map(n => (
+            <div key={n} className="staff-card skeleton-card">
+                <div className="staff-card-avatar-row">
+                    <div className="staff-avatar-circle skeleton-pulse"></div>
+                    <div className="status-badge skeleton-pulse" style={{ width: '60px', height: '20px', display: 'inline-block' }}></div>
+                </div>
+                <div className="skeleton-pulse" style={{ width: '140px', height: '24px', borderRadius: '4px', margin: '4px 0' }}></div>
+                <div className="staff-card-tags">
+                    <div className="staff-role-tag skeleton-pulse" style={{ width: '80px', height: '22px', border: 'none' }}></div>
+                    <div className="staff-spec-tag skeleton-pulse" style={{ width: '90px', height: '22px', border: 'none' }}></div>
+                </div>
+                <div className="staff-card-contact-info">
+                    <div className="skeleton-pulse" style={{ width: '180px', height: '14px', borderRadius: '4px', marginBottom: '6px' }}></div>
+                    <div className="skeleton-pulse" style={{ width: '120px', height: '14px', borderRadius: '4px' }}></div>
+                </div>
+            </div>
+        ))}
+    </div>
+);
 
 export default function OwnerDashboard() {
+    const getInitials = (name) => {
+        if (!name) return 'S';
+        return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    };
+
+    const { user, logout } = useAuth();
+
     // Navigation State
     const [activeTab, setActiveTab] = useState('DASHBOARD');
 
@@ -143,6 +179,19 @@ export default function OwnerDashboard() {
                     >
                         <Briefcase className="nav-icon" size={20} /> Staff Management
                     </div>
+                    <div
+                        className={`nav-item ${activeTab === 'SERVICE_CATALOG' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('SERVICE_CATALOG')}
+                    >
+                        <Scissors className="nav-icon" size={20} /> Service Catalog
+                    </div>
+                    <div
+                        className={`nav-item ${activeTab === 'COMBO_PACKAGES' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('COMBO_PACKAGES')}
+                    >
+                        <Sparkles className="nav-icon" size={20} /> Combo Packages
+                    </div>
+
                     {/* Other tabs can be added here later */}
                     <div className="nav-item"><Calendar className="nav-icon" size={20} /> Calendar</div>
                     <div className="nav-item"><BarChart3 className="nav-icon" size={20} /> Reports</div>
@@ -150,6 +199,9 @@ export default function OwnerDashboard() {
 
                 <div className="sidebar-bottom">
                     <div className="nav-item"><Settings className="nav-icon" size={20} /> Settings</div>
+                    <div className="nav-item logout-btn" onClick={logout}>
+                        <LogOut className="nav-icon" size={20} /> Logout
+                    </div>
                 </div>
             </div>
 
@@ -169,7 +221,7 @@ export default function OwnerDashboard() {
 
                         <div className="profile-info">
                             {/* Added explicitly as requested */}
-                            <div className="profile-name">Welcome, Boss</div>
+                            <div className="profile-name">Welcome, {user?.fullName || 'Boss'}</div>
                             <div className="profile-role" style={{ color: 'var(--primary-gold-dark)', fontWeight: 'bold' }}>OWNER</div>
                         </div>
                         <div className="profile-avatar"></div>
@@ -204,31 +256,63 @@ export default function OwnerDashboard() {
                             </div>
 
                             {isLoading ? (
-                                <p>Loading staff data...</p>
+                                <StaffSkeleton />
                             ) : staffs.length === 0 ? (
                                 <p>No staff found. Create a new user to get started.</p>
                             ) : (
                                 <div className="staff-grid">
-                                    {staffs.map(staff => (
-                                        <div key={staff.id} className="staff-card" onClick={() => openViewModal(staff)}>
-                                            <div className="staff-card-header">
-                                                <strong>{staff.fullName}</strong>
-                                                {/* Agar backend se aane wala 'active' ya 'is_active' explicitly false hai, tabhi INACTIVE dikhao */}
+                                    {staffs.map((staff, index) => (
+                                        <div
+                                            key={staff.id}
+                                            className="staff-card"
+                                            onClick={() => openViewModal(staff)}
+                                            style={{ animationDelay: `${index * 0.05}s` }}
+                                        >
+                                            <div className="staff-card-avatar-row">
+                                                <div className="staff-avatar-circle">
+                                                    {getInitials(staff.fullName)}
+                                                </div>
                                                 <span className={`status-badge ${staff.active === false || staff.is_active === false || staff.isActive === false ? 'status-inactive' : 'status-active'}`}>
                                                     {staff.active === false || staff.is_active === false || staff.isActive === false ? 'INACTIVE' : 'ACTIVE'}
                                                 </span>
                                             </div>
-                                            <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                                                {staff.role}
+
+                                            <h3 className="staff-card-name">{staff.fullName}</h3>
+
+                                            <div className="staff-card-tags">
+                                                <span className="staff-role-tag">
+                                                    <Briefcase size={12} /> {staff.role}
+                                                </span>
+                                                {staff.specialization && (
+                                                    <span className="staff-spec-tag">
+                                                        <Award size={12} /> {staff.specialization}
+                                                    </span>
+                                                )}
                                             </div>
-                                            <div style={{ fontSize: '12px' }}>
-                                                Specialty: {staff.specialization || 'N/A'}
+
+                                            <div className="staff-card-contact-info">
+                                                <div className="contact-item">
+                                                    <Mail size={13} />
+                                                    <span>{staff.email}</span>
+                                                </div>
+                                                {staff.phone && (
+                                                    <div className="contact-item">
+                                                        <Phone size={13} />
+                                                        <span>{staff.phone}</span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </div>
+                    )}
+                    {activeTab === 'SERVICE_CATALOG' && (
+                        <ServiceCatalogPage />
+                    )}
+                    {activeTab === 'COMBO_PACKAGES' && (
+                        <ComboPackagesPage />
                     )}
 
                 </div>

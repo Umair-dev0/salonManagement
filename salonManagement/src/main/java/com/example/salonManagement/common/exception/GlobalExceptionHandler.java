@@ -65,11 +65,11 @@ public class GlobalExceptionHandler {
     public ApiResponse<?> disabledUser(org.springframework.security.authentication.DisabledException e) {
         return ApiResponse.error("Your account has been disabled or deleted. Please contact the administrator.");
     }
-//    // Spring Security ke login errors (galat password/email) ko handle karne ke liye
-//    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
-//    public org.springframework.http.ResponseEntity<ApiResponse<Void>> handleBadCredentialsException(org.springframework.security.authentication.BadCredentialsException ex) {
-//        ApiResponse<Void> response = ApiResponse.error("Invalid email or password");
-//        return new org.springframework.http.ResponseEntity<>(response, org.springframework.http.HttpStatus.UNAUTHORIZED);
-//    }
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<?> handleMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException e) {
+        return ApiResponse.error("Malformed JSON request. Please check your data types and format.");
+    }
+
 }
 

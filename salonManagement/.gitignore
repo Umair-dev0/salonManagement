@@ -1,6 +1,9 @@
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-Wrapper.properties
+salonManagement/mvnw
+salonManagement/mvnw.cmd
 !**/src/main/**/target/
 !**/src/test/**/target/
 

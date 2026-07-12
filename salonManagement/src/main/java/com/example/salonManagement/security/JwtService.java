@@ -21,7 +21,7 @@ public class JwtService {
     private static final String SECRET_KEY = "9a4f2c8d3b7e6f5a1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b";
     
     // Token validity period: 8 hours (in milliseconds)
-    private static final long JWT_EXPIRATION = 1 * 60 * 60 * 1000;
+    private static final long JWT_EXPIRATION = 8 * 60 * 60 * 1000;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

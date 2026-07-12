@@ -1,0 +1,491 @@
+/* src/features/services/ComboPackagesPage.css */
+
+.combo-packages-wrapper {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.packages-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.packages-title-area h1 {
+    font-family: var(--font-serif);
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--color-on-surface);
+    margin: 0 0 6px 0;
+}
+
+.packages-title-area p {
+    font-size: 14px;
+    color: var(--color-on-surface-variant);
+    margin: 0;
+}
+
+/* Error Alert */
+.packages-error-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--color-error-container);
+    color: var(--color-on-error-container);
+    padding: 12px 18px;
+    border-radius: 0.5rem;
+    margin-bottom: 20px;
+    font-size: 14px;
+    position: relative;
+    border: 1px solid rgba(147, 0, 10, 0.1);
+}
+
+/* Grid Layout */
+.packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+/* Cards */
+.package-card {
+    background-color: var(--color-surface-container-lowest);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 8px;
+    /* rounded DEFAULT */
+    padding: 24px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.03);
+    /* Ambient shadow */
+    opacity: 0;
+    animation: cardFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.package-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 8px 30px rgba(197, 160, 89, 0.08);
+    /* Gold glow shadow */
+    border-color: var(--color-primary);
+}
+
+.package-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.package-name {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--color-on-surface);
+    margin: 0;
+    line-height: 1.25;
+}
+
+/* Price */
+.package-price-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.price-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-outline);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.price-value {
+    font-family: var(--font-sans);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.package-tax-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background-color: var(--color-surface-container-low);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--color-on-surface-variant);
+    border: 1px solid var(--color-outline-variant);
+    align-self: flex-start;
+}
+
+/* Included Services List */
+.package-services-section {
+    border-top: 1px solid var(--color-surface-container-high);
+    padding-top: 16px;
+    margin-top: 4px;
+}
+
+.package-services-section h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-on-surface);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 12px 0;
+}
+
+.attached-services-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.attached-service-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--color-on-surface-variant);
+}
+
+.check-icon {
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.service-duration {
+    font-size: 11px;
+    color: var(--color-outline);
+    margin-left: auto;
+}
+
+.no-services-msg {
+    font-size: 12px;
+    color: var(--color-outline);
+    font-style: italic;
+    margin: 0;
+}
+
+/* Form Styles & Checkbox selection */
+.package-modal-width {
+    max-width: 600px !important;
+}
+
+.checkbox-section-label {
+    margin-bottom: 12px !important;
+}
+
+.services-selection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 8px;
+    padding: 12px;
+    background-color: var(--color-surface-container-low);
+}
+
+.service-checkbox-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: var(--color-surface-container-lowest);
+    transition: all 0.2s ease;
+}
+
+.service-checkbox-card:hover {
+    border-color: var(--color-primary-container);
+    background-color: var(--color-surface-container-low);
+}
+
+.service-checkbox-card.selected {
+    border-color: var(--color-primary);
+    background-color: rgba(197, 160, 89, 0.05);
+}
+
+.custom-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+}
+
+.service-checkbox-card.selected .custom-checkbox {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.service-checkbox-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.service-checkbox-details .name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-on-surface);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.service-checkbox-details .price-dur {
+    font-size: 11px;
+    color: var(--color-outline);
+}
+
+.no-services-warning {
+    font-size: 13px;
+    color: var(--color-on-error-container);
+    font-style: italic;
+}
+
+/* Empty Packages State */
+.empty-packages-state {
+    text-align: center;
+    padding: 80px 24px;
+}
+
+.empty-packages-state h4 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    margin: 16px 0 8px 0;
+    color: var(--color-on-surface);
+}
+
+.empty-packages-state p {
+    font-size: 14px;
+    color: var(--color-on-surface-variant);
+    margin: 0 0 24px 0;
+    max-width: 440px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Filters & Search Row */
+.packages-filter-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.filter-tabs {
+    display: flex;
+    background-color: var(--color-surface-container-low);
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--color-outline-variant);
+}
+
+.filter-tab {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-on-surface-variant);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.filter-tab:hover {
+    color: var(--color-on-surface);
+}
+
+.filter-tab.active {
+    background-color: var(--color-surface-container-highest);
+    color: var(--color-primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Search Box */
+.packages-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 280px;
+}
+
+.packages-search-box .search-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--color-outline);
+    pointer-events: none;
+}
+
+.packages-search-box input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: var(--color-surface-container-lowest);
+    color: var(--color-on-surface);
+    transition: all 0.2s ease;
+}
+
+.packages-search-box input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
+}
+
+.packages-search-box .clear-search {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--color-outline);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card Inactive Status & Actions */
+.card-inactive {
+    opacity: 0.8;
+    background-color: var(--color-surface-container-low) !important;
+}
+
+.package-title-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.package-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.card-action-btn {
+    background: none;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-on-surface-variant);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: var(--color-surface-container-lowest);
+}
+
+.card-action-btn:hover {
+    transform: scale(1.05);
+}
+
+.card-action-btn.edit-btn:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    background-color: rgba(197, 160, 89, 0.05);
+}
+
+.card-action-btn.delete-btn:hover {
+    color: var(--color-on-error-container);
+    border-color: var(--color-error);
+    background-color: var(--color-error-container);
+}
+
+.card-action-btn.restore-btn {
+    width: auto;
+    padding: 0 12px;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    background-color: rgba(197, 160, 89, 0.05);
+}
+
+.card-action-btn.restore-btn:hover {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Package Info Row (Price + Duration) */
+.package-info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 4px;
+}
+
+.package-price-col, .package-duration-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.duration-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-outline);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.duration-value {
+    font-family: var(--font-sans);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-on-surface);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+}
+
+.duration-icon {
+    color: var(--color-outline);
+}
+
+/* Animations */
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
     Plus, Edit, Trash2, Layers, Tag, Briefcase, 
-    X, Check, AlertCircle, HelpCircle, ToggleLeft, ToggleRight
+    X, Check, AlertCircle, HelpCircle, ToggleLeft, ToggleRight, Search, ChevronDown
 } from 'lucide-react';
 import api from '../../api/axiosClient';
 
@@ -358,31 +358,31 @@ export default function ServiceCatalogTab() {
     // Recursively Render Category Tree Nodes
     const renderCategoryNode = (cat, depth) => {
         return (
-            <div key={cat.id} className="border-l-2 border-neutral-200 pl-4 py-2 space-y-2">
-                <div className="flex justify-between items-center group">
-                    <div className="flex items-center gap-2">
-                        <span className="font-semibold text-neutral-800">{cat.name}</span>
-                        {depth > 0 && <span className="text-xs text-neutral-400 font-normal">(Subcategory)</span>}
+            <div key={cat.id} style={{ borderLeft: '2px solid var(--outline-subtle)', paddingLeft: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{cat.name}</span>
+                        {depth > 0 && <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>(Subcategory)</span>}
                     </div>
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div style={{ display: 'flex', gap: '8px' }}>
                         <button 
                             onClick={() => openEditCategory(cat)}
-                            className="p-1 text-neutral-400 hover:text-amber-600 hover:bg-amber-50 rounded cursor-pointer"
+                            className="icon-btn"
                             title="Edit Category Name"
                         >
-                            <Edit size={14} />
+                            <Edit size={16} />
                         </button>
                         <button 
                             onClick={() => handleDeleteCategory(cat.id)}
-                            className="p-1 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded cursor-pointer"
+                            className="icon-btn" style={{ color: '#c62828' }}
                             title="Delete Category"
                         >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 </div>
                 {cat.subCategories && cat.subCategories.length > 0 && (
-                    <div className="space-y-1 mt-1">
+                    <div style={{ marginTop: '8px' }}>
                         {cat.subCategories.map(sub => renderCategoryNode(sub, depth + 1))}
                     </div>
                 )}
@@ -397,25 +397,28 @@ export default function ServiceCatalogTab() {
         const isSelected = String(selectedCategoryFilter) === String(cat.id);
 
         return (
-            <div key={cat.id} className="flex flex-col">
+            <div key={cat.id} style={{ display: 'flex', flexDirection: 'column' }}>
                 <div 
-                    className={`flex items-center hover:bg-neutral-50 transition-colors py-1.5 pr-4 text-sm ${
-                        isSelected ? 'bg-amber-50 text-amber-900 font-semibold' : 'text-neutral-700'
-                    }`}
-                    style={{ paddingLeft: `${depth * 1.25 + 0.75}rem` }}
+                    style={{ 
+                        display: 'flex', alignItems: 'center', padding: '8px 16px', 
+                        paddingLeft: `${depth * 20 + 12}px`, cursor: 'pointer',
+                        backgroundColor: isSelected ? 'rgba(197, 160, 89, 0.1)' : 'transparent',
+                        color: isSelected ? 'var(--primary-gold-dark)' : 'var(--text-main)',
+                        fontWeight: isSelected ? '600' : 'normal'
+                    }}
                 >
                     {hasChildren ? (
                         <button
                             type="button"
                             onClick={(e) => toggleCategoryExpand(cat.id, e)}
-                            className="w-5 h-5 flex items-center justify-center mr-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/50 rounded transition-colors cursor-pointer shrink-0"
+                            style={{ background: 'none', border: 'none', marginRight: '8px', cursor: 'pointer', color: 'var(--text-muted)' }}
                         >
-                            <span className="text-[10px] select-none text-neutral-500">
+                            <span style={{ fontSize: '10px' }}>
                                 {isExpanded ? '▼' : '▶'}
                             </span>
                         </button>
                     ) : (
-                        <div className="w-5 h-5 mr-1.5 shrink-0" />
+                        <div style={{ width: '20px', height: '20px', marginRight: '8px' }} />
                     )}
 
                     <button
@@ -424,7 +427,7 @@ export default function ServiceCatalogTab() {
                             setSelectedCategoryFilter(cat.id);
                             setIsDropdownOpen(false);
                         }}
-                        className="flex-1 text-left py-0.5 truncate cursor-pointer focus:outline-none font-normal"
+                        style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'inherit', fontWeight: 'inherit' }}
                     >
                         {cat.name}
                     </button>
@@ -432,8 +435,9 @@ export default function ServiceCatalogTab() {
 
                 {hasChildren && (
                     <div 
-                        className="overflow-hidden transition-all duration-300 ease-in-out"
                         style={{
+                            overflow: 'hidden',
+                            transition: 'max-height 0.3s ease, opacity 0.3s ease',
                             maxHeight: isExpanded ? '500px' : '0px',
                             opacity: isExpanded ? 1 : 0
                         }}
@@ -454,20 +458,21 @@ export default function ServiceCatalogTab() {
     });
 
     return (
-        <div className="space-y-6">
+        <div className="catalog-container fade-in" style={{ padding: '0', animationDuration: '0.6s' }}>
             {/* Header Section */}
-            <div className="flex justify-between items-center border-b border-neutral-200 pb-4">
-                <div>
-                    <h1 className="text-2xl font-semibold text-neutral-800">Service Catalogue</h1>
-                    <p className="text-sm text-neutral-500">Configure your salon's services, categories, and combo packages.</p>
+            <div className="page-header" style={{ marginBottom: '24px' }}>
+                <div className="greeting">
+                    <h1 style={{ marginBottom: '4px' }}>Service Catalogue</h1>
+                    <p>Configure your salon's services, categories, and combo packages.</p>
                 </div>
                 
                 {/* Active Inactive switch in Header */}
-                <div className="flex items-center gap-3">
-                    <label className="text-sm text-neutral-600 font-medium">Show Inactive Items</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <label style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: '600' }}>Show Inactive Items</label>
                     <button 
                         onClick={() => setIncludeInactive(!includeInactive)}
-                        className={`p-1 rounded-full transition-colors duration-200 ${includeInactive ? 'text-amber-500' : 'text-neutral-400'}`}
+                        className="icon-btn"
+                        style={{ color: includeInactive ? 'var(--primary-gold-dark)' : 'var(--text-muted)', transition: 'color 0.2s' }}
                     >
                         {includeInactive ? <ToggleRight size={38} /> : <ToggleLeft size={38} />}
                     </button>
@@ -475,34 +480,22 @@ export default function ServiceCatalogTab() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex border border-neutral-200 rounded-lg p-1 bg-neutral-50 max-w-md">
+            <div className="category-tabs" style={{ marginBottom: '32px' }}>
                 <button
                     onClick={() => setSubTab('SERVICES')}
-                    className={`flex-1 flex justify-center items-center gap-2 py-2 text-sm font-medium rounded-md transition-all ${
-                        subTab === 'SERVICES' 
-                            ? 'bg-white shadow-sm text-neutral-900 font-bold border border-neutral-200/50' 
-                            : 'text-neutral-500 hover:text-neutral-900'
-                    }`}
+                    className={`category-pill flex items-center gap-2 ${subTab === 'SERVICES' ? 'active' : ''}`}
                 >
                     <Briefcase size={16} /> Services
                 </button>
                 <button
                     onClick={() => setSubTab('CATEGORIES')}
-                    className={`flex-1 flex justify-center items-center gap-2 py-2 text-sm font-medium rounded-md transition-all ${
-                        subTab === 'CATEGORIES' 
-                            ? 'bg-white shadow-sm text-neutral-900 font-bold border border-neutral-200/50' 
-                            : 'text-neutral-500 hover:text-neutral-900'
-                    }`}
+                    className={`category-pill flex items-center gap-2 ${subTab === 'CATEGORIES' ? 'active' : ''}`}
                 >
                     <Layers size={16} /> Categories
                 </button>
                 <button
                     onClick={() => setSubTab('PACKAGES')}
-                    className={`flex-1 flex justify-center items-center gap-2 py-2 text-sm font-medium rounded-md transition-all ${
-                        subTab === 'PACKAGES' 
-                            ? 'bg-white shadow-sm text-neutral-900 font-bold border border-neutral-200/50' 
-                            : 'text-neutral-500 hover:text-neutral-900'
-                    }`}
+                    className={`category-pill flex items-center gap-2 ${subTab === 'PACKAGES' ? 'active' : ''}`}
                 >
                     <Tag size={16} /> Combo Packages
                 </button>
@@ -510,48 +503,51 @@ export default function ServiceCatalogTab() {
 
             {/* TAB CONTENT: SERVICES */}
             {subTab === 'SERVICES' && (
-                <div className="space-y-4">
+                <div className="slide-up" style={{ animationDelay: '0.1s' }}>
                     {/* Filters & Search */}
-                    <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
-                        <div className="flex flex-1 gap-3">
-                            <input
-                                type="text"
-                                placeholder="Search services..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full md:w-80 px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
-                            />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
+                        <div style={{ display: 'flex', gap: '16px', flex: 1 }}>
+                            <div className="search-container" style={{ width: '300px' }}>
+                                <Search className="search-icon" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="Search services..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="search-input"
+                                />
+                            </div>
                             
                             {/* Custom Collapsible Tree Dropdown */}
-                            <div className="relative" ref={dropdownRef}>
+                            <div className="relative" ref={dropdownRef} style={{ width: '250px', position: 'relative' }}>
                                 <button
                                     type="button"
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                    className="flex justify-between items-center gap-2 w-full md:w-64 px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm bg-white text-left shadow-sm cursor-pointer"
+                                    className="form-control"
+                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', cursor: 'pointer', backgroundColor: 'var(--bg-sidebar)' }}
                                 >
-                                    <span className="truncate">{getSelectedCategoryName()}</span>
-                                    <span className={`text-neutral-500 transition-transform duration-200 shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`}>▼</span>
+                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{getSelectedCategoryName()}</span>
+                                    <ChevronDown size={16} style={{ color: 'var(--text-muted)', transform: isDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                                 </button>
 
                                 {isDropdownOpen && (
-                                    <div className="absolute mt-1 left-0 z-50 w-full min-w-[240px] md:min-w-[280px] bg-white border border-neutral-200 rounded-lg shadow-lg py-1 max-h-80 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', zIndex: 50, width: '100%', minWidth: '240px', backgroundColor: 'var(--bg-sidebar)', border: '1px solid var(--border-color)', borderRadius: 'var(--rounded-default)', boxShadow: 'var(--shadow-surface)', maxHeight: '320px', overflowY: 'auto' }}>
                                         <div 
                                             onClick={() => {
                                                 setSelectedCategoryFilter('ALL');
                                                 setIsDropdownOpen(false);
                                             }}
-                                            className={`px-4 py-2 text-sm cursor-pointer hover:bg-neutral-50 flex items-center transition-colors ${
-                                                selectedCategoryFilter === 'ALL' 
-                                                    ? 'bg-amber-50 text-amber-900 font-semibold' 
-                                                    : 'text-neutral-700'
-                                            }`}
+                                            style={{ 
+                                                padding: '12px 16px', cursor: 'pointer', fontSize: '14px',
+                                                backgroundColor: selectedCategoryFilter === 'ALL' ? 'rgba(197, 160, 89, 0.1)' : 'transparent',
+                                                color: selectedCategoryFilter === 'ALL' ? 'var(--primary-gold-dark)' : 'var(--text-main)',
+                                                fontWeight: selectedCategoryFilter === 'ALL' ? '600' : 'normal'
+                                            }}
                                         >
                                             All Categories
                                         </div>
-                                        
-                                        <div className="border-t border-neutral-100 my-1"></div>
-                                        
-                                        <div className="py-1">
+                                        <div style={{ borderTop: '1px solid var(--border-color)', margin: '4px 0' }}></div>
+                                        <div style={{ padding: '4px 0' }}>
                                             {categories.map(cat => renderDropdownCategoryNode(cat, 0))}
                                         </div>
                                     </div>
@@ -561,153 +557,156 @@ export default function ServiceCatalogTab() {
 
                         <button 
                             onClick={openCreateService}
-                            className="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                            className="primary-btn"
                         >
-                            <Plus size={16} /> Add Service
+                            <Plus size={18} /> Add Service
                         </button>
                     </div>
 
                     {/* Services Listing */}
-                    {isLoading ? (
-                        <div className="text-center py-8 text-neutral-500 text-sm">Loading services...</div>
-                    ) : filteredServices.length === 0 ? (
-                        <div className="text-center py-12 bg-neutral-50 rounded-xl border border-dashed border-neutral-200 text-neutral-500 text-sm">
-                            No services found. Click "Add Service" to create one.
-                        </div>
-                    ) : (
-                        <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse text-sm">
-                                    <thead>
-                                        <tr className="bg-neutral-50 text-neutral-600 font-semibold border-b border-neutral-200">
-                                            <th className="p-4">Service Name</th>
-                                            <th className="p-4">Category</th>
-                                            <th className="p-4">Duration</th>
-                                            <th className="p-4">Base Price</th>
-                                            <th className="p-4">Member Price</th>
-                                            <th className="p-4">Weekend Price</th>
-                                            <th className="p-4">GST</th>
-                                            <th className="p-4">Status</th>
-                                            <th className="p-4 text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-neutral-200 text-neutral-700">
-                                        {filteredServices.map(srv => (
-                                            <tr key={srv.id} className="hover:bg-neutral-50/55 transition-colors">
-                                                <td className="p-4 font-medium text-neutral-900">
-                                                    <div>{srv.name}</div>
-                                                    {srv.description && <div className="text-xs text-neutral-400 mt-0.5 font-normal">{srv.description}</div>}
-                                                </td>
-                                                <td className="p-4"><span className="px-2.5 py-0.5 bg-neutral-100 text-neutral-700 rounded-full text-xs font-medium">{srv.categoryName}</span></td>
-                                                <td className="p-4">{srv.durationMinutes} mins</td>
-                                                <td className="p-4 font-semibold text-neutral-800">₹{srv.basePrice.toFixed(2)}</td>
-                                                <td className="p-4 text-emerald-600 font-medium">{srv.memberPrice ? `₹${srv.memberPrice.toFixed(2)}` : '—'}</td>
-                                                <td className="p-4 text-amber-700 font-medium">{srv.weekendPrice ? `₹${srv.weekendPrice.toFixed(2)}` : '—'}</td>
-                                                <td className="p-4 text-neutral-500">{srv.gstPercent}%</td>
-                                                <td className="p-4">
-                                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${srv.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-red-50 text-red-700 border border-red-200/50'}`}>
-                                                        {srv.active ? 'Active' : 'Inactive'}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4 text-right">
-                                                    <div className="flex justify-end gap-2">
-                                                        <button 
-                                                            onClick={() => openEditService(srv)}
-                                                            className="p-1.5 text-neutral-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
-                                                            title="Edit Service"
-                                                        >
-                                                            <Edit size={16} />
-                                                        </button>
-                                                        {srv.active && (
-                                                            <button 
-                                                                onClick={() => handleDeactivateService(srv.id)}
-                                                                className="p-1.5 text-neutral-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                                                                title="Deactivate Service"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                    <div className="staff-table-card">
+                        {isLoading ? (
+                            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading services...</div>
+                        ) : filteredServices.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', border: '1px dashed var(--outline-subtle)', borderRadius: 'var(--rounded-default)' }}>
+                                No services found. Click "Add Service" to create one.
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            <table className="staff-table">
+                                <thead>
+                                    <tr>
+                                        <th>Service Name</th>
+                                        <th>Category</th>
+                                        <th>Duration</th>
+                                        <th>Base Price</th>
+                                        <th>Member Price</th>
+                                        <th>Weekend Price</th>
+                                        <th>GST</th>
+                                        <th>Status</th>
+                                        <th style={{ textAlign: 'right' }}>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredServices.map(srv => (
+                                        <tr key={srv.id}>
+                                            <td>
+                                                <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>{srv.name}</div>
+                                                {srv.description && <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{srv.description}</div>}
+                                            </td>
+                                            <td>
+                                                <span className="status-badge" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-muted)' }}>
+                                                    {srv.categoryName}
+                                                </span>
+                                            </td>
+                                            <td>{srv.durationMinutes} mins</td>
+                                            <td style={{ fontWeight: '600' }}>₹{srv.basePrice.toFixed(2)}</td>
+                                            <td style={{ color: '#2e7d32', fontWeight: '500' }}>{srv.memberPrice ? `₹${srv.memberPrice.toFixed(2)}` : '—'}</td>
+                                            <td style={{ color: 'var(--primary-gold-dark)', fontWeight: '500' }}>{srv.weekendPrice ? `₹${srv.weekendPrice.toFixed(2)}` : '—'}</td>
+                                            <td style={{ color: 'var(--text-muted)' }}>{srv.gstPercent}%</td>
+                                            <td>
+                                                <span className={`status-badge ${srv.active ? 'status-active' : 'status-inactive'}`}>
+                                                    {srv.active ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </td>
+                                            <td style={{ textAlign: 'right' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                                    <button 
+                                                        onClick={() => openEditService(srv)}
+                                                        className="icon-btn"
+                                                        title="Edit Service"
+                                                    >
+                                                        <Edit size={18} />
+                                                    </button>
+                                                    {srv.active && (
+                                                        <button 
+                                                            onClick={() => handleDeactivateService(srv.id)}
+                                                            className="icon-btn" style={{ color: '#c62828' }}
+                                                            title="Deactivate Service"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
                 </div>
             )}
 
             {/* TAB CONTENT: CATEGORIES */}
             {subTab === 'CATEGORIES' && (
-                <div className="space-y-4 max-w-3xl">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-lg font-medium text-neutral-800">Categories Hierarchy</h2>
+                <div className="slide-up" style={{ animationDelay: '0.1s', maxWidth: '800px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', color: 'var(--text-main)', margin: 0 }}>Categories Hierarchy</h2>
                         <button 
                             onClick={openCreateCategory}
-                            className="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
+                            className="primary-btn"
                         >
-                            <Plus size={16} /> Add Category
+                            <Plus size={18} /> Add Category
                         </button>
                     </div>
 
-                    {isLoading ? (
-                        <div className="text-center py-8 text-neutral-500 text-sm">Loading categories...</div>
-                    ) : categories.length === 0 ? (
-                        <div className="text-center py-12 bg-neutral-50 rounded-xl border border-dashed border-neutral-200 text-neutral-500 text-sm">
-                            No categories found. Click "Add Category" to get started.
-                        </div>
-                    ) : (
-                        <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm space-y-4">
-                            {/* Recursively render categories hierarchy */}
-                            {categories.map(cat => renderCategoryNode(cat, 0))}
-                        </div>
-                    )}
+                    <div className="activity-card">
+                        {isLoading ? (
+                            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading categories...</div>
+                        ) : categories.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', border: '1px dashed var(--outline-subtle)', borderRadius: 'var(--rounded-default)' }}>
+                                No categories found. Click "Add Category" to get started.
+                            </div>
+                        ) : (
+                            <div>
+                                {categories.map(cat => renderCategoryNode(cat, 0))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
 
             {/* TAB CONTENT: PACKAGES */}
             {subTab === 'PACKAGES' && (
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-lg font-medium text-neutral-800">Combo & Service Packages</h2>
+                <div className="slide-up" style={{ animationDelay: '0.1s' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', color: 'var(--text-main)', margin: 0 }}>Combo & Service Packages</h2>
                         <button 
                             onClick={openCreatePackage}
-                            className="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
+                            className="primary-btn"
                         >
-                            <Plus size={16} /> Add Package
+                            <Plus size={18} /> Add Package
                         </button>
                     </div>
 
                     {isLoading ? (
-                        <div className="text-center py-8 text-neutral-500 text-sm">Loading packages...</div>
+                        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading packages...</div>
                     ) : packages.length === 0 ? (
-                        <div className="text-center py-12 bg-neutral-50 rounded-xl border border-dashed border-neutral-200 text-neutral-500 text-sm">
+                        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', border: '1px dashed var(--outline-subtle)', borderRadius: 'var(--rounded-default)' }}>
                             No packages configured. Click "Add Package" to create one.
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="service-grid">
                             {packages.map(pkg => (
-                                <div key={pkg.id} className="bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-                                    <div className="p-5 space-y-4">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-semibold text-neutral-900 text-base">{pkg.name}</h3>
-                                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${pkg.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-red-50 text-red-700 border border-red-200/50'}`}>
+                                <div key={pkg.id} className="service-card">
+                                    <div style={{ padding: '24px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                                            <h3 className="service-title">{pkg.name}</h3>
+                                            <span className={`status-badge ${pkg.active ? 'status-active' : 'status-inactive'}`}>
                                                 {pkg.active ? 'Active' : 'Inactive'}
                                             </span>
                                         </div>
                                         
-                                        <div className="flex items-baseline gap-2">
-                                            <span className="text-2xl font-bold text-neutral-800">₹{pkg.packagePrice.toFixed(2)}</span>
-                                            <span className="text-xs text-neutral-400">({pkg.gstPercent}% GST extra)</span>
+                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '16px' }}>
+                                            <span className="service-price">₹{pkg.packagePrice.toFixed(2)}</span>
+                                            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>({pkg.gstPercent}% GST extra)</span>
                                         </div>
 
-                                        <div className="space-y-1.5">
-                                            <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Services Included:</div>
-                                            <div className="flex flex-wrap gap-1.5">
+                                        <div>
+                                            <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Services Included:</div>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                                 {pkg.services && pkg.services.map(s => (
-                                                    <span key={s.id} className="text-xs bg-neutral-100 text-neutral-700 px-2 py-1 rounded border border-neutral-200/40">
+                                                    <span key={s.id} style={{ fontSize: '12px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--outline-subtle)' }}>
                                                         {s.name}
                                                     </span>
                                                 ))}
@@ -715,19 +714,19 @@ export default function ServiceCatalogTab() {
                                         </div>
                                     </div>
 
-                                    <div className="bg-neutral-50 px-5 py-3 border-t border-neutral-150 flex justify-end gap-2">
+                                    <div style={{ backgroundColor: 'var(--bg-main)', padding: '16px 24px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                                         <button 
                                             onClick={() => openEditPackage(pkg)}
-                                            className="p-1.5 text-neutral-500 hover:text-amber-600 hover:bg-amber-100/50 rounded-lg transition-colors cursor-pointer text-sm font-medium flex items-center gap-1.5"
+                                            className="secondary-btn" style={{ padding: '8px 16px', fontSize: '14px' }}
                                         >
-                                            <Edit size={14} /> Edit
+                                            <Edit size={14} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'text-bottom' }} /> Edit
                                         </button>
                                         {pkg.active && (
                                             <button 
                                                 onClick={() => handleDeactivatePackage(pkg.id)}
-                                                className="p-1.5 text-neutral-500 hover:text-red-600 hover:bg-red-100/50 rounded-lg transition-colors cursor-pointer text-sm font-medium flex items-center gap-1.5"
+                                                className="danger-btn"
                                             >
-                                                <Trash2 size={14} /> Deactivate
+                                                <Trash2 size={14} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'text-bottom' }} /> Deactivate
                                             </button>
                                         )}
                                     </div>
@@ -742,57 +741,50 @@ export default function ServiceCatalogTab() {
                 1. CATEGORY CREATE/EDIT MODAL
             ========================================== */}
             {isCategoryModalOpen && (
-                <div className="catalog-modal-overlay">
-                    <div className="catalog-modal-content category-modal">
-                        <div className="catalog-modal-header">
-                            <h3>{categoryModalMode === 'CREATE' ? 'Add New Category' : 'Edit Category'}</h3>
-                            <button onClick={() => setIsCategoryModalOpen(false)} className="close-btn cursor-pointer">
-                                <X size={20} />
+                <div className="modal-overlay fade-in">
+                    <div className="modal-content scale-in" style={{ maxWidth: '500px' }}>
+                        <div className="modal-header">
+                            <h2>{categoryModalMode === 'CREATE' ? 'Add New Category' : 'Edit Category'}</h2>
+                            <button onClick={() => setIsCategoryModalOpen(false)} className="close-btn">
+                                <X size={24} />
                             </button>
                         </div>
-                        <form onSubmit={handleCategorySubmit} className="catalog-modal-form">
-                            <div className="space-y-1">
-                                <label className="text-sm font-medium text-neutral-700">Category Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={categoryForm.name}
-                                    onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value }))}
-                                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
-                                    placeholder="e.g. Massages, Nail Art"
-                                />
-                            </div>
+                        <form onSubmit={handleCategorySubmit}>
+                            <div className="form-grid">
+                                <div className="form-group full-width">
+                                    <label>Category Name</label>
+                                    <input
+                                        type="text" required
+                                        value={categoryForm.name}
+                                        onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value }))}
+                                        className="form-control"
+                                        placeholder="e.g. Massages, Nail Art"
+                                    />
+                                </div>
 
-                            <div className="space-y-1">
-                                <label className="text-sm font-medium text-neutral-700">Parent Category (Optional)</label>
-                                <select
-                                    value={categoryForm.parentId}
-                                    onChange={(e) => setCategoryForm(prev => ({ ...prev, parentId: e.target.value }))}
-                                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm bg-white"
-                                >
-                                    <option value="">No Parent (Top-level Category)</option>
-                                    {flatCategories
-                                        .filter(c => categoryModalMode === 'CREATE' || c.id !== selectedCategory?.id)
-                                        .map(c => (
-                                            <option key={c.id} value={c.id}>{c.name}</option>
-                                        ))
-                                    }
-                                </select>
+                                <div className="form-group full-width">
+                                    <label>Parent Category (Optional)</label>
+                                    <select
+                                        value={categoryForm.parentId}
+                                        onChange={(e) => setCategoryForm(prev => ({ ...prev, parentId: e.target.value }))}
+                                        className="form-control"
+                                    >
+                                        <option value="">No Parent (Top-level Category)</option>
+                                        {flatCategories
+                                            .filter(c => categoryModalMode === 'CREATE' || c.id !== selectedCategory?.id)
+                                            .map(c => (
+                                                <option key={c.id} value={c.id}>{c.name}</option>
+                                            ))
+                                        }
+                                    </select>
+                                </div>
                             </div>
 
                             <div className="modal-actions">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsCategoryModalOpen(false)}
-                                    className="px-4 py-2 border border-neutral-300 text-neutral-700 hover:bg-neutral-50 font-medium text-sm rounded-lg transition-colors cursor-pointer"
-                                >
+                                <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="secondary-btn">
                                     Cancel
                                 </button>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-sm transition-colors cursor-pointer"
-                                >
+                                <button type="submit" disabled={isLoading} className="primary-btn">
                                     {isLoading ? 'Saving...' : 'Save Category'}
                                 </button>
                             </div>
@@ -805,23 +797,23 @@ export default function ServiceCatalogTab() {
                 2. SERVICE CREATE/EDIT MODAL
             ========================================== */}
             {isServiceModalOpen && (
-                <div className="catalog-modal-overlay">
-                    <div className="catalog-modal-content">
-                        <div className="catalog-modal-header">
-                            <h3>{serviceModalMode === 'CREATE' ? 'Add New Service' : 'Edit Service'}</h3>
-                            <button onClick={() => setIsServiceModalOpen(false)} className="close-btn cursor-pointer">
-                                <X size={20} />
+                <div className="modal-overlay fade-in">
+                    <div className="modal-content scale-in" style={{ maxWidth: '600px' }}>
+                        <div className="modal-header">
+                            <h2>{serviceModalMode === 'CREATE' ? 'Add New Service' : 'Edit Service'}</h2>
+                            <button onClick={() => setIsServiceModalOpen(false)} className="close-btn">
+                                <X size={24} />
                             </button>
                         </div>
-                        <form onSubmit={handleServiceSubmit} className="catalog-modal-form">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1 md:col-span-2">
-                                    <label className="text-sm font-medium text-neutral-700">Category</label>
+                        <form onSubmit={handleServiceSubmit}>
+                            <div className="form-grid">
+                                <div className="form-group full-width">
+                                    <label>Category</label>
                                     <select
                                         required
                                         value={serviceForm.categoryId}
                                         onChange={(e) => setServiceForm(prev => ({ ...prev, categoryId: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm bg-white"
+                                        className="form-control"
                                     >
                                         {flatCategories.map(c => (
                                             <option key={c.id} value={c.id}>{c.name}</option>
@@ -829,120 +821,94 @@ export default function ServiceCatalogTab() {
                                     </select>
                                 </div>
 
-                                <div className="space-y-1 md:col-span-2">
-                                    <label className="text-sm font-medium text-neutral-700">Service Name</label>
+                                <div className="form-group full-width">
+                                    <label>Service Name</label>
                                     <input
-                                        type="text"
-                                        required
+                                        type="text" required
                                         value={serviceForm.name}
                                         onChange={(e) => setServiceForm(prev => ({ ...prev, name: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
+                                        className="form-control"
                                         placeholder="e.g. Haircut & Blow Dry"
                                     />
                                 </div>
 
-                                <div className="space-y-1 md:col-span-2">
-                                    <label className="text-sm font-medium text-neutral-700">Description</label>
+                                <div className="form-group full-width">
+                                    <label>Description</label>
                                     <textarea
                                         value={serviceForm.description}
                                         onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm h-20 resize-none"
+                                        className="form-control" style={{ minHeight: '80px', resize: 'vertical' }}
                                         placeholder="Add service details here..."
                                     />
                                 </div>
 
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-neutral-700">Base Price (₹)</label>
+                                <div className="form-group">
+                                    <label>Base Price (₹)</label>
                                     <input
-                                        type="number"
-                                        required
-                                        min="0"
-                                        step="0.01"
+                                        type="number" required min="0" step="0.01"
                                         value={serviceForm.basePrice}
                                         onChange={(e) => setServiceForm(prev => ({ ...prev, basePrice: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
-                                        placeholder="0.00"
+                                        className="form-control" placeholder="0.00"
                                     />
                                 </div>
 
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-neutral-700">Member Price (₹) - Optional</label>
+                                <div className="form-group">
+                                    <label>Member Price (₹)</label>
                                     <input
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
+                                        type="number" min="0" step="0.01"
                                         value={serviceForm.memberPrice}
                                         onChange={(e) => setServiceForm(prev => ({ ...prev, memberPrice: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
-                                        placeholder="0.00"
+                                        className="form-control" placeholder="0.00"
                                     />
                                 </div>
 
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-neutral-700">Weekend Price (₹) - Optional</label>
+                                <div className="form-group">
+                                    <label>Weekend Price (₹)</label>
                                     <input
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
+                                        type="number" min="0" step="0.01"
                                         value={serviceForm.weekendPrice}
                                         onChange={(e) => setServiceForm(prev => ({ ...prev, weekendPrice: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
-                                        placeholder="0.00"
+                                        className="form-control" placeholder="0.00"
                                     />
                                 </div>
 
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-neutral-700">Duration (Minutes)</label>
+                                <div className="form-group">
+                                    <label>Duration (Minutes)</label>
                                     <input
-                                        type="number"
-                                        required
-                                        min="1"
+                                        type="number" required min="1"
                                         value={serviceForm.durationMinutes}
                                         onChange={(e) => setServiceForm(prev => ({ ...prev, durationMinutes: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
-                                        placeholder="e.g. 30"
+                                        className="form-control" placeholder="e.g. 30"
                                     />
                                 </div>
 
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-neutral-700">GST Percent (%)</label>
+                                <div className="form-group">
+                                    <label>GST Percent (%)</label>
                                     <input
-                                        type="number"
-                                        required
-                                        min="0"
-                                        step="0.01"
+                                        type="number" required min="0" step="0.01"
                                         value={serviceForm.gstPercent}
                                         onChange={(e) => setServiceForm(prev => ({ ...prev, gstPercent: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
-                                        placeholder="18.00"
+                                        className="form-control" placeholder="18.00"
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-3 pt-6">
+                                <div className="form-group full-width" style={{ flexDirection: 'row', alignItems: 'center', gap: '12px', marginTop: '12px' }}>
                                     <input
                                         type="checkbox"
                                         id="serviceActive"
                                         checked={serviceForm.active}
                                         onChange={(e) => setServiceForm(prev => ({ ...prev, active: e.target.checked }))}
-                                        className="w-4 h-4 text-amber-600 focus:ring-amber-550 border-neutral-300 rounded"
+                                        style={{ width: '18px', height: '18px', accentColor: 'var(--primary-gold-dark)' }}
                                     />
-                                    <label htmlFor="serviceActive" className="text-sm font-medium text-neutral-700 cursor-pointer">Active / Visible</label>
+                                    <label htmlFor="serviceActive" style={{ cursor: 'pointer', margin: 0 }}>Active / Visible</label>
                                 </div>
                             </div>
 
                             <div className="modal-actions">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsServiceModalOpen(false)}
-                                    className="px-4 py-2 border border-neutral-300 text-neutral-700 hover:bg-neutral-50 font-medium text-sm rounded-lg transition-colors cursor-pointer"
-                                >
+                                <button type="button" onClick={() => setIsServiceModalOpen(false)} className="secondary-btn">
                                     Cancel
                                 </button>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-sm transition-colors cursor-pointer"
-                                >
+                                <button type="submit" disabled={isLoading} className="primary-btn">
                                     {isLoading ? 'Saving...' : 'Save Service'}
                                 </button>
                             </div>
@@ -955,110 +921,93 @@ export default function ServiceCatalogTab() {
                 3. COMBO PACKAGE CREATE/EDIT MODAL
             ========================================== */}
             {isPackageModalOpen && (
-                <div className="catalog-modal-overlay">
-                    <div className="catalog-modal-content">
-                        <div className="catalog-modal-header">
-                            <h3>{packageModalMode === 'CREATE' ? 'Create Combo Package' : 'Edit Package'}</h3>
-                            <button onClick={() => setIsPackageModalOpen(false)} className="close-btn cursor-pointer">
-                                <X size={20} />
+                <div className="modal-overlay fade-in">
+                    <div className="modal-content scale-in" style={{ maxWidth: '600px' }}>
+                        <div className="modal-header">
+                            <h2>{packageModalMode === 'CREATE' ? 'Create Combo Package' : 'Edit Package'}</h2>
+                            <button onClick={() => setIsPackageModalOpen(false)} className="close-btn">
+                                <X size={24} />
                             </button>
                         </div>
-                        <form onSubmit={handlePackageSubmit} className="catalog-modal-form">
-                            <div className="space-y-1">
-                                <label className="text-sm font-medium text-neutral-700">Package Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={packageForm.name}
-                                    onChange={(e) => setPackageForm(prev => ({ ...prev, name: e.target.value }))}
-                                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
-                                    placeholder="e.g. Bridal Deluxe Spa Pack"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-neutral-700">Package Price (₹)</label>
+                        <form onSubmit={handlePackageSubmit}>
+                            <div className="form-grid">
+                                <div className="form-group full-width">
+                                    <label>Package Name</label>
                                     <input
-                                        type="number"
-                                        required
-                                        min="0"
-                                        step="0.01"
+                                        type="text" required
+                                        value={packageForm.name}
+                                        onChange={(e) => setPackageForm(prev => ({ ...prev, name: e.target.value }))}
+                                        className="form-control"
+                                        placeholder="e.g. Bridal Deluxe Spa Pack"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Package Price (₹)</label>
+                                    <input
+                                        type="number" required min="0" step="0.01"
                                         value={packageForm.packagePrice}
                                         onChange={(e) => setPackageForm(prev => ({ ...prev, packagePrice: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
-                                        placeholder="0.00"
+                                        className="form-control" placeholder="0.00"
                                     />
                                 </div>
 
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-neutral-700">GST Percent (%)</label>
+                                <div className="form-group">
+                                    <label>GST Percent (%)</label>
                                     <input
-                                        type="number"
-                                        required
-                                        min="0"
-                                        step="0.01"
+                                        type="number" required min="0" step="0.01"
                                         value={packageForm.gstPercent}
                                         onChange={(e) => setPackageForm(prev => ({ ...prev, gstPercent: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm"
-                                        placeholder="18.00"
+                                        className="form-control" placeholder="18.00"
                                     />
                                 </div>
-                            </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-neutral-700 flex items-center gap-1.5">
-                                    Select Services in Package 
-                                    <HelpCircle size={14} className="text-neutral-400" title="Check all individual services that are included in this bundle." />
-                                </label>
-                                
-                                <div className="border border-neutral-200 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
-                                    {services.length === 0 ? (
-                                        <p className="text-xs text-neutral-400">No services available. Create services first.</p>
-                                    ) : (
-                                        services.map(srv => (
-                                            <div key={srv.id} className="flex items-center gap-3">
-                                                <input
-                                                    type="checkbox"
-                                                    id={`pkg-srv-${srv.id}`}
-                                                    checked={packageForm.serviceIds.includes(srv.id)}
-                                                    onChange={() => handlePackageServiceCheckboxChange(srv.id)}
-                                                    className="w-4 h-4 text-amber-600 focus:ring-amber-550 border-neutral-300 rounded cursor-pointer"
-                                                />
-                                                <label htmlFor={`pkg-srv-${srv.id}`} className="text-xs text-neutral-700 select-none cursor-pointer flex justify-between w-full">
-                                                    <span>{srv.name} <span className="text-neutral-400">({srv.categoryName})</span></span>
-                                                    <span className="font-semibold text-neutral-600">₹{srv.basePrice}</span>
-                                                </label>
-                                            </div>
-                                        ))
-                                    )}
+                                <div className="form-group full-width">
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        Select Services in Package 
+                                        <HelpCircle size={14} style={{ color: 'var(--text-muted)' }} title="Check all individual services that are included in this bundle." />
+                                    </label>
+                                    
+                                    <div style={{ border: '1px solid var(--outline-subtle)', borderRadius: 'var(--rounded-default)', padding: '12px', maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {services.length === 0 ? (
+                                            <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>No services available. Create services first.</p>
+                                        ) : (
+                                            services.map(srv => (
+                                                <div key={srv.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`pkg-srv-${srv.id}`}
+                                                        checked={packageForm.serviceIds.includes(srv.id)}
+                                                        onChange={() => handlePackageServiceCheckboxChange(srv.id)}
+                                                        style={{ width: '16px', height: '16px', accentColor: 'var(--primary-gold-dark)', cursor: 'pointer' }}
+                                                    />
+                                                    <label htmlFor={`pkg-srv-${srv.id}`} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', width: '100%', margin: 0, fontSize: '14px', fontWeight: 'normal', color: 'var(--text-main)', textTransform: 'none', letterSpacing: 'normal' }}>
+                                                        <span>{srv.name} <span style={{ color: 'var(--text-muted)' }}>({srv.categoryName})</span></span>
+                                                        <span style={{ fontWeight: '600' }}>₹{srv.basePrice}</span>
+                                                    </label>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="flex items-center gap-3 pt-2">
-                                <input
-                                    type="checkbox"
-                                    id="packageActive"
-                                    checked={packageForm.active}
-                                    onChange={(e) => setPackageForm(prev => ({ ...prev, active: e.target.checked }))}
-                                    className="w-4 h-4 text-amber-600 focus:ring-amber-550 border-neutral-300 rounded"
-                                />
-                                <label htmlFor="packageActive" className="text-sm font-medium text-neutral-700 cursor-pointer">Active / Visible</label>
+                                <div className="form-group full-width" style={{ flexDirection: 'row', alignItems: 'center', gap: '12px', marginTop: '12px' }}>
+                                    <input
+                                        type="checkbox"
+                                        id="packageActive"
+                                        checked={packageForm.active}
+                                        onChange={(e) => setPackageForm(prev => ({ ...prev, active: e.target.checked }))}
+                                        style={{ width: '18px', height: '18px', accentColor: 'var(--primary-gold-dark)' }}
+                                    />
+                                    <label htmlFor="packageActive" style={{ cursor: 'pointer', margin: 0 }}>Active / Visible</label>
+                                </div>
                             </div>
 
                             <div className="modal-actions">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsPackageModalOpen(false)}
-                                    className="px-4 py-2 border border-neutral-300 text-neutral-700 hover:bg-neutral-50 font-medium text-sm rounded-lg transition-colors cursor-pointer"
-                                >
+                                <button type="button" onClick={() => setIsPackageModalOpen(false)} className="secondary-btn">
                                     Cancel
                                 </button>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-sm transition-colors cursor-pointer"
-                                >
+                                <button type="submit" disabled={isLoading} className="primary-btn">
                                     {isLoading ? 'Saving...' : 'Save Combo Package'}
                                 </button>
                             </div>

@@ -8,6 +8,8 @@ import {
 import api from '../../api/axiosClient'; // Aapka setup kiya hua axios interceptor
 import './Dashboard.css';
 import ServiceCatalogTab from '../services/ServiceCatalogTab';
+import CustomerCRMTab from '../customers/CustomerCRMTab';
+import CalendarPage from '../appointments/CalendarPage';
 import InventoryDashboardPage from '../inventory/pages/InventoryDashboardPage';
 import { useAuth } from '../../context/AuthContext';
 
@@ -171,6 +173,12 @@ export default function OwnerDashboard() {
                         <Briefcase className="nav-icon" size={20} /> Staff Management
                     </div>
                     <div
+                        className={`nav-item ${activeTab === 'CUSTOMERS' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/customers')}
+                    >
+                        <Users className="nav-icon" size={20} /> Customers
+                    </div>
+                    <div
                         className={`nav-item ${activeTab === 'SERVICES' ? 'active' : ''}`}
                         onClick={() => navigate('/dashboard/service-catalogue')}
                     >
@@ -293,6 +301,10 @@ export default function OwnerDashboard() {
                         </div>
                     )}
 
+                    {activeTab === 'CUSTOMERS' && (
+                        <CustomerCRMTab />
+                    )}
+
                     {activeTab === 'SERVICES' && (
                         <ServiceCatalogTab />
                     )}
@@ -302,18 +314,7 @@ export default function OwnerDashboard() {
                     )}
 
                     {activeTab === 'CALENDAR' && (
-                        <div>
-                            <div className="page-header">
-                                <div className="greeting">
-                                    <h1>Calendar</h1>
-                                    <p>View daily schedules and bookings.</p>
-                                </div>
-                            </div>
-                            <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
-                                <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>Calendar Coming Soon</h3>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>This section is currently being integrated with salon booking engines.</p>
-                            </div>
-                        </div>
+                        <CalendarPage />
                     )}
 
                     {activeTab === 'REPORTS' && (

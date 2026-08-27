@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Calendar, Users, Briefcase, BarChart3, Settings, Bell, Search, Scissors, LogOut, Package } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ServiceCatalogTab from '../services/ServiceCatalogTab';
+import CustomerCRMTab from '../customers/CustomerCRMTab';
+import CalendarPage from '../appointments/CalendarPage';
 import InventoryDashboardPage from '../inventory/pages/InventoryDashboardPage';
 import './Dashboard.css'; // Wahi premium CSS reuse kar rahe hain
 
@@ -55,9 +57,9 @@ export default function ManagerDashboard() {
                     </div>
                     <div 
                         className={`nav-item ${activeTab === 'CLIENTS' ? 'active' : ''}`}
-                        onClick={() => navigate('/dashboard/clients')}
+                        onClick={() => navigate('/dashboard/customers')}
                     >
-                        <Users className="nav-icon" size={20} /> Clients
+                        <Users className="nav-icon" size={20} /> Customers
                     </div>
                     <div 
                         className={`nav-item ${activeTab === 'INVENTORY' ? 'active' : ''}`}
@@ -127,33 +129,11 @@ export default function ManagerDashboard() {
                     )}
 
                     {activeTab === 'CALENDAR' && (
-                        <div>
-                            <div className="page-header">
-                                <div className="greeting">
-                                    <h1>Calendar & Schedule</h1>
-                                    <p>View daily appointments and therapist schedules.</p>
-                                </div>
-                            </div>
-                            <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
-                                <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>Calendar Module Coming Soon</h3>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>This section is currently being integrated with booking records.</p>
-                            </div>
-                        </div>
+                        <CalendarPage />
                     )}
 
                     {activeTab === 'CLIENTS' && (
-                        <div>
-                            <div className="page-header">
-                                <div className="greeting">
-                                    <h1>Clients Directory</h1>
-                                    <p>Manage salon clients and view customer records.</p>
-                                </div>
-                            </div>
-                            <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
-                                <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>Clients Module Coming Soon</h3>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Customer loyalty programs and visit history tracking will be available here.</p>
-                            </div>
-                        </div>
+                        <CustomerCRMTab />
                     )}
 
                     {activeTab === 'INVENTORY' && (

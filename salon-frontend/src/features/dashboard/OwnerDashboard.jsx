@@ -3,11 +3,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard, Calendar, Users, Briefcase,
     Scissors, BarChart3, Settings, HelpCircle,
-    Search, Bell, UserPlus, X, Edit, Trash2, LogOut
+    Search, Bell, UserPlus, X, Edit, Trash2, LogOut, Package
 } from 'lucide-react';
 import api from '../../api/axiosClient'; // Aapka setup kiya hua axios interceptor
 import './Dashboard.css';
 import ServiceCatalogTab from '../services/ServiceCatalogTab';
+import InventoryDashboardPage from '../inventory/pages/InventoryDashboardPage';
 import { useAuth } from '../../context/AuthContext';
 
 export default function OwnerDashboard() {
@@ -18,11 +19,12 @@ export default function OwnerDashboard() {
 
     // Map path to active tab
     const getActiveTabFromPath = (path) => {
-        if (path.endsWith('/staff')) return 'STAFF';
-        if (path.endsWith('/service-catalogue')) return 'SERVICES';
-        if (path.endsWith('/calendar')) return 'CALENDAR';
-        if (path.endsWith('/reports')) return 'REPORTS';
-        if (path.endsWith('/settings')) return 'SETTINGS';
+        if (path.includes('/staff')) return 'STAFF';
+        if (path.includes('/service-catalogue')) return 'SERVICES';
+        if (path.includes('/inventory')) return 'INVENTORY';
+        if (path.includes('/calendar')) return 'CALENDAR';
+        if (path.includes('/reports')) return 'REPORTS';
+        if (path.includes('/settings')) return 'SETTINGS';
         return 'DASHBOARD';
     };
 
@@ -175,6 +177,12 @@ export default function OwnerDashboard() {
                         <Scissors className="nav-icon" size={20} /> Service Catalogue
                     </div>
                     <div
+                        className={`nav-item ${activeTab === 'INVENTORY' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/inventory')}
+                    >
+                        <Package className="nav-icon" size={20} /> Inventory & Stock
+                    </div>
+                    <div
                         className={`nav-item ${activeTab === 'CALENDAR' ? 'active' : ''}`}
                         onClick={() => navigate('/dashboard/calendar')}
                     >
@@ -287,6 +295,10 @@ export default function OwnerDashboard() {
 
                     {activeTab === 'SERVICES' && (
                         <ServiceCatalogTab />
+                    )}
+
+                    {activeTab === 'INVENTORY' && (
+                        <InventoryDashboardPage />
                     )}
 
                     {activeTab === 'CALENDAR' && (

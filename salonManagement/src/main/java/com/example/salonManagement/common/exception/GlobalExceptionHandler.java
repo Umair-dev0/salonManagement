@@ -34,6 +34,12 @@ public class GlobalExceptionHandler {
         return ApiResponse.error(e.getMessage());
     }
 
+    @ExceptionHandler(InsufficientStockException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<?> insufficientStock(InsufficientStockException e) {
+        return ApiResponse.error(e.getMessage());
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiResponse<?> badCredentials(BadCredentialsException e) {

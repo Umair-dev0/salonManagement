@@ -1,8 +1,9 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Briefcase, BarChart3, Settings, Bell, Search, Scissors, LogOut } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Briefcase, BarChart3, Settings, Bell, Search, Scissors, LogOut, Package } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ServiceCatalogTab from '../services/ServiceCatalogTab';
+import InventoryDashboardPage from '../inventory/pages/InventoryDashboardPage';
 import './Dashboard.css'; // Wahi premium CSS reuse kar rahe hain
 
 export default function ManagerDashboard() {
@@ -14,11 +15,11 @@ export default function ManagerDashboard() {
 
     // Map path to active tab
     const getActiveTabFromPath = (path) => {
-        if (path.endsWith('/service-catalogue')) return 'SERVICES';
-        if (path.endsWith('/calendar')) return 'CALENDAR';
-        if (path.endsWith('/clients')) return 'CLIENTS';
-        if (path.endsWith('/inventory')) return 'INVENTORY';
-        if (path.endsWith('/reports')) return 'REPORTS';
+        if (path.includes('/service-catalogue')) return 'SERVICES';
+        if (path.includes('/calendar')) return 'CALENDAR';
+        if (path.includes('/clients')) return 'CLIENTS';
+        if (path.includes('/inventory')) return 'INVENTORY';
+        if (path.includes('/reports')) return 'REPORTS';
         return 'DASHBOARD';
     };
 
@@ -62,7 +63,7 @@ export default function ManagerDashboard() {
                         className={`nav-item ${activeTab === 'INVENTORY' ? 'active' : ''}`}
                         onClick={() => navigate('/dashboard/inventory')}
                     >
-                        <Briefcase className="nav-icon" size={20} /> Inventory
+                        <Package className="nav-icon" size={20} /> Inventory & Stock
                     </div>
                     <div 
                         className={`nav-item ${activeTab === 'REPORTS' ? 'active' : ''}`}
@@ -156,18 +157,7 @@ export default function ManagerDashboard() {
                     )}
 
                     {activeTab === 'INVENTORY' && (
-                        <div>
-                            <div className="page-header">
-                                <div className="greeting">
-                                    <h1>Inventory Management</h1>
-                                    <p>Track salon supplies, products, and stock levels.</p>
-                                </div>
-                            </div>
-                            <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
-                                <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>Inventory Module Coming Soon</h3>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Stock alerts, supplier orders, and product usage analytics are under development.</p>
-                            </div>
-                        </div>
+                        <InventoryDashboardPage />
                     )}
 
                     {activeTab === 'REPORTS' && (

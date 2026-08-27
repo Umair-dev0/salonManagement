@@ -1,0 +1,27 @@
+CREATE TABLE appointments (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    customer_id BIGINT REFERENCES customers(id) NOT NULL,
+    appointment_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('BOOKED', 'CONFIRMED', 'CHECKED_IN', 'IN_SERVICE', 'COMPLETED', 'BILLED', 'CANCELLED')),
+    source VARCHAR(15) NOT NULL CHECK (source IN ('WALK_IN', 'ONLINE', 'FRONT_DESK')),
+    notes TEXT,
+    created_by BIGINT REFERENCES users(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE appointment_services (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    appointment_id BIGINT REFERENCES appointments(id) ON DELETE CASCADE NOT NULL,
+    service_id BIGINT REFERENCES services(id) NOT NULL,
+    assigned_user_id BIGINT REFERENCES users(id) NOT NULL,
+    price NUMERIC(12,2) NOT NULL,
+    status VARCHAR(15) NOT NULL CHECK (status IN ('PENDING', 'STARTED', 'COMPLETED')),
+    is_addon BOOLEAN NOT NULL DEFAULT FALSE,
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

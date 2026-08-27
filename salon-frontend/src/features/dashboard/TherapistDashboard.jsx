@@ -1,11 +1,21 @@
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { CalendarCheck, Star, Bell, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import MyAppointmentsPage from '../appointments/MyAppointmentsPage';
 import './Dashboard.css';
 
 export default function TherapistDashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const getActiveTab = (path) => {
+        if (path.endsWith('/performance')) return 'PERFORMANCE';
+        return 'APPOINTMENTS';
+    };
+
+    const activeTab = getActiveTab(location.pathname);
 
     return (
         <div className="dashboard-layout">
@@ -16,8 +26,18 @@ export default function TherapistDashboard() {
                 </div>
 
                 <div className="nav-menu">
-                    <div className="nav-item active"><CalendarCheck className="nav-icon" size={20} /> My Appointments</div>
-                    <div className="nav-item"><Star className="nav-icon" size={20} /> My Performance</div>
+                    <div
+                        className={`nav-item ${activeTab === 'APPOINTMENTS' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard')}
+                    >
+                        <CalendarCheck className="nav-icon" size={20} /> My Appointments
+                    </div>
+                    <div
+                        className={`nav-item ${activeTab === 'PERFORMANCE' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/performance')}
+                    >
+                        <Star className="nav-icon" size={20} /> My Performance
+                    </div>
                 </div>
 
                 <div className="sidebar-bottom">
@@ -48,17 +68,24 @@ export default function TherapistDashboard() {
                 </div>
 
                 <div className="dashboard-body">
-                    <div className="page-header">
-                        <div className="greeting">
-                            <h1>Hello, {user?.fullName || 'Stylist'}</h1>
-                            <p>Here is your schedule for today.</p>
-                        </div>
-                    </div>
+                    {activeTab === 'APPOINTMENTS' && (
+                        <MyAppointmentsPage />
+                    )}
 
-                    <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
-                        <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>No upcoming appointments</h3>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>When the front desk assigns a client to you, it will appear here.</p>
-                    </div>
+                    {activeTab === 'PERFORMANCE' && (
+                        <div>
+                            <div className="page-header">
+                                <div className="greeting">
+                                    <h1>My Performance</h1>
+                                    <p>Track your commissions, completed services & client reviews.</p>
+                                </div>
+                            </div>
+                            <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
+                                <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>Performance analytics coming soon</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Commissions and services tallies will populate here.</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

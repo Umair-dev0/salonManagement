@@ -1,11 +1,25 @@
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, CalendarDays, Users, Receipt, Bell, Search, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import CustomerCRMTab from '../customers/CustomerCRMTab';
+import CalendarPage from '../appointments/CalendarPage';
+import BillingPOSPage from '../billing/BillingPOSPage';
 import './Dashboard.css';
 
 export default function FrontDeskDashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const getActiveTab = (path) => {
+        if (path.endsWith('/customers')) return 'CUSTOMERS';
+        if (path.endsWith('/bookings')) return 'BOOKINGS';
+        if (path.endsWith('/billing')) return 'BILLING';
+        return 'DASHBOARD';
+    };
+
+    const activeTab = getActiveTab(location.pathname);
 
     return (
         <div className="dashboard-layout">
@@ -16,10 +30,30 @@ export default function FrontDeskDashboard() {
                 </div>
 
                 <div className="nav-menu">
-                    <div className="nav-item active"><LayoutDashboard className="nav-icon" size={20} /> Front Desk Home</div>
-                    <div className="nav-item"><CalendarDays className="nav-icon" size={20} /> Bookings</div>
-                    <div className="nav-item"><Users className="nav-icon" size={20} /> Walk-ins & Clients</div>
-                    <div className="nav-item"><Receipt className="nav-icon" size={20} /> Billing & POS</div>
+                    <div
+                        className={`nav-item ${activeTab === 'DASHBOARD' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard')}
+                    >
+                        <LayoutDashboard className="nav-icon" size={20} /> Front Desk Home
+                    </div>
+                    <div
+                        className={`nav-item ${activeTab === 'BOOKINGS' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/bookings')}
+                    >
+                        <CalendarDays className="nav-icon" size={20} /> Bookings
+                    </div>
+                    <div
+                        className={`nav-item ${activeTab === 'CUSTOMERS' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/customers')}
+                    >
+                        <Users className="nav-icon" size={20} /> Customers
+                    </div>
+                    <div
+                        className={`nav-item ${activeTab === 'BILLING' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/billing')}
+                    >
+                        <Receipt className="nav-icon" size={20} /> Billing & POS
+                    </div>
                 </div>
 
                 <div className="sidebar-bottom">
@@ -53,17 +87,21 @@ export default function FrontDeskDashboard() {
                 </div>
 
                 <div className="dashboard-body">
-                    <div className="page-header">
-                        <div className="greeting">
-                            <h1>Good Day, {user?.fullName || 'Cashier'}</h1>
-                            <p>Manage today's appointments and billing from here.</p>
-                        </div>
-                    </div>
+                    {activeTab === 'DASHBOARD' && (
+                        <CalendarPage />
+                    )}
 
-                    <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
-                        <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>Ready for Walk-ins</h3>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>The daily booking calendar will appear here.</p>
-                    </div>
+                    {activeTab === 'CUSTOMERS' && (
+                        <CustomerCRMTab />
+                    )}
+
+                    {activeTab === 'BOOKINGS' && (
+                        <CalendarPage />
+                    )}
+
+                    {activeTab === 'BILLING' && (
+                        <BillingPOSPage />
+                    )}
                 </div>
             </div>
         </div>

@@ -19,7 +19,7 @@ export default function ManagerDashboard() {
     const getActiveTabFromPath = (path) => {
         if (path.includes('/service-catalogue')) return 'SERVICES';
         if (path.includes('/calendar')) return 'CALENDAR';
-        if (path.includes('/clients')) return 'CLIENTS';
+        if (path.includes('/customers') || path.includes('/clients')) return 'CLIENTS';
         if (path.includes('/inventory')) return 'INVENTORY';
         if (path.includes('/reports')) return 'REPORTS';
         return 'DASHBOARD';

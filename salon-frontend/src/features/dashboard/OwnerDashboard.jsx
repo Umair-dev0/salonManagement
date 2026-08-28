@@ -22,6 +22,7 @@ export default function OwnerDashboard() {
     // Map path to active tab
     const getActiveTabFromPath = (path) => {
         if (path.includes('/staff')) return 'STAFF';
+        if (path.includes('/customers')) return 'CUSTOMERS';
         if (path.includes('/service-catalogue')) return 'SERVICES';
         if (path.includes('/inventory')) return 'INVENTORY';
         if (path.includes('/calendar')) return 'CALENDAR';

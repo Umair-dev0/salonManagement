@@ -1,10 +1,11 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, Users, Receipt, Bell, Search, LogOut } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, Receipt, Bell, Search, LogOut, Award } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import CustomerCRMTab from '../customers/CustomerCRMTab';
 import CalendarPage from '../appointments/CalendarPage';
 import BillingPOSPage from '../billing/BillingPOSPage';
+import MembershipPage from '../membership/pages/MembershipPage';
 import './Dashboard.css';
 
 export default function FrontDeskDashboard() {
@@ -13,6 +14,7 @@ export default function FrontDeskDashboard() {
     const location = useLocation();
 
     const getActiveTab = (path) => {
+        if (path.includes('/memberships') || path.includes('/membership')) return 'MEMBERSHIPS';
         if (path.endsWith('/customers')) return 'CUSTOMERS';
         if (path.endsWith('/bookings')) return 'BOOKINGS';
         if (path.endsWith('/billing')) return 'BILLING';
@@ -47,6 +49,12 @@ export default function FrontDeskDashboard() {
                         onClick={() => navigate('/dashboard/customers')}
                     >
                         <Users className="nav-icon" size={20} /> Customers
+                    </div>
+                    <div
+                        className={`nav-item ${activeTab === 'MEMBERSHIPS' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/memberships')}
+                    >
+                        <Award className="nav-icon" size={20} /> Memberships & Loyalty
                     </div>
                     <div
                         className={`nav-item ${activeTab === 'BILLING' ? 'active' : ''}`}
@@ -93,6 +101,10 @@ export default function FrontDeskDashboard() {
 
                     {activeTab === 'CUSTOMERS' && (
                         <CustomerCRMTab />
+                    )}
+
+                    {activeTab === 'MEMBERSHIPS' && (
+                        <MembershipPage />
                     )}
 
                     {activeTab === 'BOOKINGS' && (

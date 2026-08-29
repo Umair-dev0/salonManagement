@@ -6,6 +6,24 @@ export const createDraftInvoice = async (appointmentId) => {
     return response.data.data;
 };
 
+// Create direct retail sale invoice
+export const createDirectSaleInvoice = async (payload) => {
+    const response = await api.post('/invoices/direct-sale', payload);
+    return response.data.data;
+};
+
+// Add retail product to draft invoice
+export const addProductToInvoice = async (invoiceId, payload) => {
+    const response = await api.post(`/invoices/${invoiceId}/add-product`, payload);
+    return response.data.data;
+};
+
+// Remove item from draft invoice
+export const removeInvoiceItem = async (invoiceId, itemId) => {
+    const response = await api.delete(`/invoices/${invoiceId}/items/${itemId}`);
+    return response.data.data;
+};
+
 // Retrieve a single invoice with details
 export const getInvoice = async (id) => {
     const response = await api.get(`/invoices/${id}`);

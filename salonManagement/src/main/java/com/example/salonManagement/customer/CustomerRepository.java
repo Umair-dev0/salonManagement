@@ -19,4 +19,14 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Page<Customer> findByFullNameContainingIgnoreCaseOrMobileContaining(String fullName, String mobile, Pageable pageable);
 
     Page<Customer> findAllByActiveTrue(Pageable pageable);
+
+    long countByActiveTrue();
+
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(DISTINCT a.id) FROM Appointment a WHERE a.customer.id = :customerId AND a.status IN ('BILLED', 'COMPLETED')")
+    Integer countVisitsByCustomerId(@org.springframework.data.repository.query.Param("customerId") Long customerId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(i.totalAmount), 0.00) FROM Invoice i WHERE i.customer.id = :customerId AND i.paymentStatus = 'PAID'")
+    java.math.BigDecimal sumSpentByCustomerId(@org.springframework.data.repository.query.Param("customerId") Long customerId);
 }
+
+

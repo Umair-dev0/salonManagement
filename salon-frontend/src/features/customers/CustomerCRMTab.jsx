@@ -3,12 +3,14 @@ import {
     Users, UserPlus, Search, X, Edit, Trash2,
     Phone, Mail, MapPin, Star, Calendar, TrendingUp,
     ChevronRight, Filter, Download, Eye, AlertCircle,
-    Gift, Clock, Heart
+    Gift, Clock, Heart, Crown
 } from 'lucide-react';
 import {
     getCustomers, createCustomer,
     updateCustomer, deleteCustomer, getCustomerHistory
 } from '../../api/customers';
+import { getMembershipPlans, subscribeCustomerPlan } from '../../api/membership';
+import { formatMoney } from '../../utils/formatMoney';
 
 // ==========================================
 // HELPER FUNCTIONS
@@ -90,7 +92,7 @@ const CustomerCard = ({ customer, onClick }) => {
 // CUSTOMER DETAIL PANEL
 // ==========================================
 
-const CustomerDetailPanel = ({ customer, history, isHistoryLoading, onClose, onEdit, onDelete }) => {
+const CustomerDetailPanel = ({ customer, history, isHistoryLoading, onClose, onEdit, onDelete, onAssignMembership }) => {
     if (!customer) return null;
     const avatarColor = getAvatarColor(customer.fullName);
 
@@ -196,7 +198,7 @@ const CustomerDetailPanel = ({ customer, history, isHistoryLoading, onClose, onE
                 <div className="detail-info-row" style={{ marginTop: '12px' }}>
                     <Calendar size={15} className="detail-info-icon" />
                     <div>
-                        <div className="detail-info-label">Member Since</div>
+                        <div className="detail-info-label">Customer Since</div>
                         <div className="detail-info-value">{formatDate(customer.createdAt)}</div>
                     </div>
                 </div>
@@ -229,10 +231,184 @@ const CustomerDetailPanel = ({ customer, history, isHistoryLoading, onClose, onE
                     <Trash2 size={15} style={{ marginRight: '4px' }} />
                     Deactivate
                 </button>
+                <button
+                    className="secondary-btn"
+                    onClick={() => onAssignMembership(customer)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#fffdfa', border: '1px solid #fde68a', color: '#b4833e', fontWeight: 'bold' }}
+                >
+                    <Crown size={14} /> Assign VIP Membership
+                </button>
                 <button className="primary-btn" onClick={() => onEdit(customer)}>
                     <Edit size={15} />
                     Edit Customer
                 </button>
+            </div>
+        </div>
+    );
+};
+
+// ==========================================
+// ASSIGN MEMBERSHIP MODAL COMPONENT
+// ==========================================
+
+const AssignMembershipModal = ({ customer, onClose, onSuccess }) => {
+    const [plans, setPlans] = useState([]);
+    const [selectedPlanId, setSelectedPlanId] = useState('');
+    const [paymentMode, setPaymentMode] = useState('CASH');
+    const [referenceNo, setReferenceNo] = useState('');
+    const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        const loadPlans = async () => {
+            try {
+                const data = await getMembershipPlans();
+                const activePlans = (data || []).filter(p => p.active);
+                setPlans(activePlans);
+                if (activePlans.length > 0) {
+                    setSelectedPlanId(activePlans[0].id);
+                }
+            } catch (err) {
+                console.error("Failed to load membership plans:", err);
+            } finally {
+                setIsLoadingPlans(false);
+            }
+        };
+        loadPlans();
+    }, []);
+
+    const selectedPlan = plans.find(p => p.id === Number(selectedPlanId));
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedPlan) {
+            alert("Please select a valid membership plan.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await subscribeCustomerPlan({
+                customerId: customer.id,
+                planId: selectedPlan.id
+            });
+
+            alert(`Membership Activated Successfully!\n\nClient: ${customer.fullName}\nPlan: ${selectedPlan.name} (${selectedPlan.tier} Tier)\nPayment Collected: ${formatMoney(selectedPlan.price)} via ${paymentMode}${referenceNo ? ` (Ref: ${referenceNo})` : ''}\nDiscount Benefit: ${selectedPlan.discountPercent}% OFF on all services!\nWallet Balance: ${formatMoney(selectedPlan.walletValue)}`);
+            onSuccess();
+        } catch (err) {
+            alert(err.response?.data?.message || "Failed to assign membership.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content" style={{ maxWidth: '520px' }}>
+                <div className="modal-header">
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-gold-dark)' }}>
+                        <Crown size={20} color="#b4833e" /> Assign VIP Membership
+                    </h2>
+                    <button className="close-btn" onClick={onClose}><X size={22} /></button>
+                </div>
+
+                {isLoadingPlans ? (
+                    <div style={{ padding: '30px', textAlign: 'center' }}>
+                        <div className="crm-spinner" style={{ margin: '0 auto 12px auto' }} />
+                        <p>Loading membership tier plans...</p>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit}>
+                        <div style={{ backgroundColor: 'var(--bg-main)', padding: '12px', borderRadius: '8px', marginBottom: '16px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Billed Client:</div>
+                            <div style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-main)' }}>
+                                {customer.fullName} ({customer.mobile})
+                            </div>
+                        </div>
+
+                        <div className="form-grid">
+                            <div className="form-group full-width">
+                                <label style={{ fontWeight: 'bold' }}>1. Select Membership Tier Plan *</label>
+                                <select
+                                    className="form-control"
+                                    value={selectedPlanId}
+                                    onChange={e => setSelectedPlanId(e.target.value)}
+                                    required
+                                >
+                                    {plans.map(p => (
+                                        <option key={p.id} value={p.id}>
+                                            {p.name} [{p.tier}] - {formatMoney(p.price)} ({p.discountPercent}% OFF)
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {selectedPlan && (
+                                <div className="full-width" style={{
+                                    backgroundColor: '#fffdfa',
+                                    border: '1px solid #fde68a',
+                                    borderRadius: '8px',
+                                    padding: '14px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '8px',
+                                    fontSize: '13px'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', color: '#78350f' }}>
+                                        <span>Plan Amount to Collect:</span>
+                                        <span style={{ fontSize: '16px' }}>{formatMoney(selectedPlan.price)}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
+                                        <span>Member Benefit:</span>
+                                        <span style={{ fontWeight: 'bold', color: '#15803d' }}>{selectedPlan.discountPercent}% OFF on all services</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
+                                        <span>Initial Wallet Credit:</span>
+                                        <span style={{ fontWeight: 'bold', color: 'var(--primary-gold-dark)' }}>{formatMoney(selectedPlan.walletValue)}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
+                                        <span>Validity Period:</span>
+                                        <span>{selectedPlan.validityDays} days</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="form-group">
+                                <label style={{ fontWeight: 'bold' }}>2. Payment Mode *</label>
+                                <select
+                                    className="form-control"
+                                    value={paymentMode}
+                                    onChange={e => setPaymentMode(e.target.value)}
+                                >
+                                    <option value="CASH">Cash</option>
+                                    <option value="CARD">Card</option>
+                                    <option value="UPI">UPI (QR/App)</option>
+                                    <option value="NET_BANKING">Net Banking</option>
+                                    <option value="WALLET">Wallet</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Txn Reference No (Optional)</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="e.g. UPI-987654"
+                                    value={referenceNo}
+                                    onChange={e => setReferenceNo(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="modal-actions" style={{ marginTop: '20px' }}>
+                            <button type="button" className="secondary-btn" onClick={onClose}>Cancel</button>
+                            <button type="submit" className="primary-btn" disabled={isSubmitting || !selectedPlan}>
+                                <Crown size={16} />
+                                {isSubmitting ? 'Processing...' : `Collect ${selectedPlan ? formatMoney(selectedPlan.price) : ''} & Activate`}
+                            </button>
+                        </div>
+                    </form>
+                )}
             </div>
         </div>
     );
@@ -261,7 +437,6 @@ const CustomerFormModal = ({ mode, initialData, onClose, onSubmit, isLoading }) 
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Clean up empty strings to null for backend
         const payload = Object.fromEntries(
             Object.entries(formData).map(([k, v]) => [k, v === '' ? null : v])
         );
@@ -278,7 +453,6 @@ const CustomerFormModal = ({ mode, initialData, onClose, onSubmit, isLoading }) 
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-grid">
-                        {/* Full Name */}
                         <div className="form-group full-width">
                             <label>Full Name *</label>
                             <input
@@ -292,7 +466,6 @@ const CustomerFormModal = ({ mode, initialData, onClose, onSubmit, isLoading }) 
                             />
                         </div>
 
-                        {/* Mobile */}
                         <div className="form-group">
                             <label>Mobile Number *</label>
                             <input
@@ -306,7 +479,6 @@ const CustomerFormModal = ({ mode, initialData, onClose, onSubmit, isLoading }) 
                             />
                         </div>
 
-                        {/* Email */}
                         <div className="form-group">
                             <label>Email Address</label>
                             <input
@@ -319,7 +491,6 @@ const CustomerFormModal = ({ mode, initialData, onClose, onSubmit, isLoading }) 
                             />
                         </div>
 
-                        {/* Gender */}
                         <div className="form-group">
                             <label>Gender</label>
                             <select
@@ -335,7 +506,6 @@ const CustomerFormModal = ({ mode, initialData, onClose, onSubmit, isLoading }) 
                             </select>
                         </div>
 
-                        {/* Date of Birth */}
                         <div className="form-group">
                             <label>Date of Birth</label>
                             <input
@@ -347,7 +517,6 @@ const CustomerFormModal = ({ mode, initialData, onClose, onSubmit, isLoading }) 
                             />
                         </div>
 
-                        {/* Anniversary */}
                         <div className="form-group">
                             <label>Anniversary</label>
                             <input
@@ -359,7 +528,6 @@ const CustomerFormModal = ({ mode, initialData, onClose, onSubmit, isLoading }) 
                             />
                         </div>
 
-                        {/* Allergies */}
                         <div className="form-group full-width">
                             <label>Allergies / Sensitivities</label>
                             <input
@@ -372,7 +540,6 @@ const CustomerFormModal = ({ mode, initialData, onClose, onSubmit, isLoading }) 
                             />
                         </div>
 
-                        {/* Notes */}
                         <div className="form-group full-width">
                             <label>Internal Notes</label>
                             <textarea
@@ -421,9 +588,13 @@ export default function CustomerCRMTab() {
     const [selectedCustomerHistory, setSelectedCustomerHistory] = useState(null);
     const [isHistoryLoading, setIsHistoryLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalMode, setModalMode] = useState('CREATE'); // 'CREATE' | 'EDIT'
+    const [modalMode, setModalMode] = useState('CREATE');
     const [editTarget, setEditTarget] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Assign Membership Modal State
+    const [isAssignMemOpen, setIsAssignMemOpen] = useState(false);
+    const [assignMemCustomer, setAssignMemCustomer] = useState(null);
 
     // ==========================================
     // DATA FETCHING
@@ -434,7 +605,6 @@ export default function CustomerCRMTab() {
         setError(null);
         try {
             const data = await getCustomers();
-            // Handle Spring Boot Paginated response structure
             setCustomers(data?.content || data || []);
         } catch (err) {
             console.error('Failed to fetch customers:', err);
@@ -455,12 +625,10 @@ export default function CustomerCRMTab() {
     useEffect(() => {
         let result = [...customers];
 
-        // Gender filter
         if (filterGender !== 'ALL') {
             result = result.filter(c => c.gender === filterGender);
         }
 
-        // Local text search (fast client-side)
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
             result = result.filter(c =>
@@ -479,7 +647,6 @@ export default function CustomerCRMTab() {
 
     const totalCustomers = customers.length;
     const totalLoyaltyPoints = customers.reduce((s, c) => s + (c.loyaltyPoints || 0), 0);
-    // Suppress NaN if spends aren't stored directly in basic list response
     const totalRevenue = customers.reduce((s, c) => s + (c.totalSpent || 0), 0);
     const repeatCustomers = customers.filter(c => (c.totalVisits || 0) > 1).length;
 
@@ -511,7 +678,12 @@ export default function CustomerCRMTab() {
         setEditTarget(customer);
         setModalMode('EDIT');
         setIsModalOpen(true);
-        setSelectedCustomer(null); // Close the panel
+        setSelectedCustomer(null);
+    };
+
+    const handleAssignMembership = (customer) => {
+        setAssignMemCustomer(customer);
+        setIsAssignMemOpen(true);
     };
 
     const handleFormSubmit = async (formData) => {
@@ -550,10 +722,6 @@ export default function CustomerCRMTab() {
             }
         }
     };
-
-    // ==========================================
-    // RENDER
-    // ==========================================
 
     return (
         <div className="crm-container">
@@ -697,11 +865,12 @@ export default function CustomerCRMTab() {
                         onClose={() => setSelectedCustomer(null)}
                         onEdit={openEditModal}
                         onDelete={handleDelete}
+                        onAssignMembership={handleAssignMembership}
                     />
                 )}
             </div>
 
-            {/* ---- MODAL ---- */}
+            {/* ---- CUSTOMER FORM MODAL ---- */}
             {isModalOpen && (
                 <CustomerFormModal
                     mode={modalMode}
@@ -709,6 +878,18 @@ export default function CustomerCRMTab() {
                     onClose={() => setIsModalOpen(false)}
                     onSubmit={handleFormSubmit}
                     isLoading={isSubmitting}
+                />
+            )}
+
+            {/* ---- ASSIGN MEMBERSHIP PAYMENT MODAL ---- */}
+            {isAssignMemOpen && assignMemCustomer && (
+                <AssignMembershipModal
+                    customer={assignMemCustomer}
+                    onClose={() => setIsAssignMemOpen(false)}
+                    onSuccess={() => {
+                        setIsAssignMemOpen(false);
+                        fetchCustomers();
+                    }}
                 />
             )}
         </div>

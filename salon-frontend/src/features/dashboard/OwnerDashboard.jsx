@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard, Calendar, Users, Briefcase,
     Scissors, BarChart3, Settings, HelpCircle,
-    Search, Bell, UserPlus, X, Edit, Trash2, LogOut, Package
+    Search, Bell, UserPlus, X, Edit, Trash2, LogOut, Package, Award
 } from 'lucide-react';
 import api from '../../api/axiosClient'; // Aapka setup kiya hua axios interceptor
 import './Dashboard.css';
@@ -11,7 +11,10 @@ import ServiceCatalogTab from '../services/ServiceCatalogTab';
 import CustomerCRMTab from '../customers/CustomerCRMTab';
 import CalendarPage from '../appointments/CalendarPage';
 import InventoryDashboardPage from '../inventory/pages/InventoryDashboardPage';
+import MembershipPage from '../membership/pages/MembershipPage';
+import DashboardPage from './DashboardPage';
 import { useAuth } from '../../context/AuthContext';
+
 
 export default function OwnerDashboard() {
     const { logout } = useAuth();
@@ -21,6 +24,7 @@ export default function OwnerDashboard() {
 
     // Map path to active tab
     const getActiveTabFromPath = (path) => {
+        if (path.includes('/memberships') || path.includes('/membership')) return 'MEMBERSHIPS';
         if (path.includes('/staff')) return 'STAFF';
         if (path.includes('/customers')) return 'CUSTOMERS';
         if (path.includes('/service-catalogue')) return 'SERVICES';
@@ -180,6 +184,12 @@ export default function OwnerDashboard() {
                         <Users className="nav-icon" size={20} /> Customers
                     </div>
                     <div
+                        className={`nav-item ${activeTab === 'MEMBERSHIPS' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/memberships')}
+                    >
+                        <Award className="nav-icon" size={20} /> Memberships & Loyalty
+                    </div>
+                    <div
                         className={`nav-item ${activeTab === 'SERVICES' ? 'active' : ''}`}
                         onClick={() => navigate('/dashboard/service-catalogue')}
                     >
@@ -251,16 +261,9 @@ export default function OwnerDashboard() {
                 <div className="dashboard-body">
 
                     {activeTab === 'DASHBOARD' && (
-                        <div>
-                            <div className="page-header">
-                                <div className="greeting">
-                                    <h1>Good Morning</h1>
-                                    <p>Select "Staff Management" from the menu to manage your users.</p>
-                                </div>
-                            </div>
-                            {/* Baki Dashboard UI jo pehle tha, waisa hi rahega yahan */}
-                        </div>
+                        <DashboardPage />
                     )}
+
 
                     {activeTab === 'STAFF' && (
                         <div>
@@ -304,6 +307,10 @@ export default function OwnerDashboard() {
 
                     {activeTab === 'CUSTOMERS' && (
                         <CustomerCRMTab />
+                    )}
+
+                    {activeTab === 'MEMBERSHIPS' && (
+                        <MembershipPage />
                     )}
 
                     {activeTab === 'SERVICES' && (

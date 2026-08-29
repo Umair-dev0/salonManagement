@@ -1,20 +1,21 @@
 package com.example.salonManagement.customer;
 
+import com.example.salonManagement.appointment.Appointment;
+import com.example.salonManagement.appointment.AppointmentRepository;
 import com.example.salonManagement.common.exception.ConflictException;
 import com.example.salonManagement.common.exception.NotFoundException;
 import com.example.salonManagement.customer.dto.CustomerHistoryResponse;
 import com.example.salonManagement.customer.dto.CustomerRequest;
 import com.example.salonManagement.customer.dto.CustomerResponse;
+import com.example.salonManagement.membership.LoyaltyTransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import com.example.salonManagement.appointment.AppointmentRepository;
-import com.example.salonManagement.appointment.Appointment;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -23,18 +24,38 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final AppointmentRepository appointmentRepository;
+    private final LoyaltyTransactionRepository loyaltyTransactionRepository;
+
+    private CustomerResponse mapToResponse(Customer customer) {
+        Integer visits = customerRepository.countVisitsByCustomerId(customer.getId());
+        BigDecimal spent = customerRepository.sumSpentByCustomerId(customer.getId());
+        Integer earn = loyaltyTransactionRepository.sumPointsByCustomerIdAndTxnType(customer.getId(), "EARN");
+        Integer redeem = loyaltyTransactionRepository.sumPointsByCustomerIdAndTxnType(customer.getId(), "REDEEM");
+        
+        Integer activeLoyaltyPoints;
+        if ((earn != null && earn > 0) || (redeem != null && redeem > 0)) {
+            activeLoyaltyPoints = Math.max(0, (earn != null ? earn : 0) - (redeem != null ? redeem : 0));
+        } else {
+            activeLoyaltyPoints = customer.getLoyaltyPoints() != null ? customer.getLoyaltyPoints() : 0;
+        }
+
+        return CustomerResponse.from(
+                customer,
+                visits != null ? visits : 0,
+                spent != null ? spent : BigDecimal.ZERO,
+                activeLoyaltyPoints
+        );
+    }
 
     // ==========================================
     // CREATE
     // ==========================================
     @Transactional
     public CustomerResponse createCustomer(CustomerRequest request) {
-        // Duplicate mobile check
         customerRepository.findByMobile(request.mobile()).ifPresent(c -> {
             throw new ConflictException("Mobile number already registered: " + request.mobile());
         });
 
-        // Duplicate email check
         if (request.email() != null && !request.email().isBlank()) {
             customerRepository.findByEmail(request.email()).ifPresent(c -> {
                 throw new ConflictException("Email already registered: " + request.email());
@@ -51,9 +72,10 @@ public class CustomerService {
         customer.setPreferredStylistId(request.preferredStylistId());
         customer.setAllergies(request.allergies());
         customer.setNotes(request.notes());
+        customer.setLoyaltyPoints(0);
 
         Customer saved = customerRepository.save(customer);
-        return CustomerResponse.from(saved);
+        return mapToResponse(saved);
     }
 
     // ==========================================
@@ -69,7 +91,7 @@ public class CustomerService {
         } else {
             customersPage = customerRepository.findAllByActiveTrue(pageable);
         }
-        return customersPage.map(CustomerResponse::from);
+        return customersPage.map(this::mapToResponse);
     }
 
     // ==========================================
@@ -79,7 +101,7 @@ public class CustomerService {
     public CustomerResponse getCustomerById(Long id) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Customer not found with id: " + id));
-        return CustomerResponse.from(customer);
+        return mapToResponse(customer);
     }
 
     // ==========================================
@@ -90,14 +112,12 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Customer not found with id: " + id));
 
-        // Duplicate mobile check (excluding current customer)
         if (!request.mobile().equals(customer.getMobile())) {
             customerRepository.findByMobile(request.mobile()).ifPresent(c -> {
                 throw new ConflictException("Mobile number already registered: " + request.mobile());
             });
         }
 
-        // Duplicate email check (excluding current customer)
         if (request.email() != null && !request.email().equals(customer.getEmail())) {
             customerRepository.findByEmail(request.email()).ifPresent(c -> {
                 throw new ConflictException("Email already registered: " + request.email());
@@ -115,12 +135,10 @@ public class CustomerService {
         customer.setNotes(request.notes());
 
         Customer updated = customerRepository.save(customer);
-        return CustomerResponse.from(updated);
+        return mapToResponse(updated);
     }
 
-
     // SOFT DELETE
-
     @Transactional
     public void deleteCustomer(Long id) {
         Customer customer = customerRepository.findById(id)

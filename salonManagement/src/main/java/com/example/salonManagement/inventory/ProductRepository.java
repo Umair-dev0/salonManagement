@@ -18,6 +18,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Optional<Product> findByIdAndIsActiveTrue(Long id);
 
+    @Query("SELECT p FROM Product p WHERE p.isActive = true AND p.currentStock <= p.reorderLevel")
+    java.util.List<Product> findLowStockProducts();
+
+
     @Query("SELECT p FROM Product p WHERE p.isActive = true " +
            "AND (:category IS NULL OR :category = '' OR LOWER(p.category) = LOWER(:category)) " +
            "AND (:lowStock IS NULL OR :lowStock = false OR p.currentStock <= p.reorderLevel) " +

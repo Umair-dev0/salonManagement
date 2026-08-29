@@ -2,6 +2,7 @@ package com.example.salonManagement.customer.dto;
 
 import com.example.salonManagement.customer.Customer;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
@@ -17,10 +18,16 @@ public record CustomerResponse(
         String allergies,
         String notes,
         Integer loyaltyPoints,
+        Integer totalVisits,
+        BigDecimal totalSpent,
         boolean active,
         ZonedDateTime createdAt
 ) {
     public static CustomerResponse from(Customer customer) {
+        return from(customer, 0, BigDecimal.ZERO, customer.getLoyaltyPoints() != null ? customer.getLoyaltyPoints() : 0);
+    }
+
+    public static CustomerResponse from(Customer customer, Integer totalVisits, BigDecimal totalSpent, Integer activeLoyaltyPoints) {
         return new CustomerResponse(
                 customer.getId(),
                 customer.getFullName(),
@@ -32,7 +39,9 @@ public record CustomerResponse(
                 customer.getPreferredStylistId(),
                 customer.getAllergies(),
                 customer.getNotes(),
-                customer.getLoyaltyPoints(),
+                activeLoyaltyPoints != null ? activeLoyaltyPoints : (customer.getLoyaltyPoints() != null ? customer.getLoyaltyPoints() : 0),
+                totalVisits != null ? totalVisits : 0,
+                totalSpent != null ? totalSpent : BigDecimal.ZERO,
                 customer.isActive(),
                 customer.getCreatedAt()
         );

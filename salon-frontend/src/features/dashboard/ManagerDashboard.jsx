@@ -1,12 +1,15 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Briefcase, BarChart3, Settings, Bell, Search, Scissors, LogOut, Package } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Briefcase, BarChart3, Settings, Bell, Search, Scissors, LogOut, Package, Award } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ServiceCatalogTab from '../services/ServiceCatalogTab';
 import CustomerCRMTab from '../customers/CustomerCRMTab';
 import CalendarPage from '../appointments/CalendarPage';
 import InventoryDashboardPage from '../inventory/pages/InventoryDashboardPage';
+import MembershipPage from '../membership/pages/MembershipPage';
+import DashboardPage from './DashboardPage';
 import './Dashboard.css'; // Wahi premium CSS reuse kar rahe hain
+
 
 export default function ManagerDashboard() {
     const { user, logout } = useAuth();
@@ -17,6 +20,7 @@ export default function ManagerDashboard() {
 
     // Map path to active tab
     const getActiveTabFromPath = (path) => {
+        if (path.includes('/memberships') || path.includes('/membership')) return 'MEMBERSHIPS';
         if (path.includes('/service-catalogue')) return 'SERVICES';
         if (path.includes('/calendar')) return 'CALENDAR';
         if (path.includes('/customers') || path.includes('/clients')) return 'CLIENTS';
@@ -60,6 +64,12 @@ export default function ManagerDashboard() {
                         onClick={() => navigate('/dashboard/customers')}
                     >
                         <Users className="nav-icon" size={20} /> Customers
+                    </div>
+                    <div 
+                        className={`nav-item ${activeTab === 'MEMBERSHIPS' ? 'active' : ''}`}
+                        onClick={() => navigate('/dashboard/memberships')}
+                    >
+                        <Award className="nav-icon" size={20} /> Memberships & Loyalty
                     </div>
                     <div 
                         className={`nav-item ${activeTab === 'INVENTORY' ? 'active' : ''}`}
@@ -108,21 +118,9 @@ export default function ManagerDashboard() {
 
                 <div className="dashboard-body">
                     {activeTab === 'DASHBOARD' && (
-                        <div>
-                            <div className="page-header">
-                                <div className="greeting">
-                                    <h1>Welcome, {user?.fullName || 'Manager'}</h1>
-                                    <p>Your branch overview and daily tasks will appear here.</p>
-                                </div>
-                            </div>
-
-                            {/* Empty State for now */}
-                            <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--outline-variant)' }}>
-                                <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-muted)' }}>No recent data to display</h3>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Once the backend modules are ready, branch statistics will populate here.</p>
-                            </div>
-                        </div>
+                        <DashboardPage />
                     )}
+
 
                     {activeTab === 'SERVICES' && (
                         <ServiceCatalogTab />
@@ -134,6 +132,10 @@ export default function ManagerDashboard() {
 
                     {activeTab === 'CLIENTS' && (
                         <CustomerCRMTab />
+                    )}
+
+                    {activeTab === 'MEMBERSHIPS' && (
+                        <MembershipPage />
                     )}
 
                     {activeTab === 'INVENTORY' && (

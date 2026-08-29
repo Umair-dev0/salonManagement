@@ -162,6 +162,15 @@ public class InventoryService {
         return movements.map(StockMovementResponse::from);
     }
 
+    @Transactional
+    public StockMovement recordSaleMovement(Long productId, BigDecimal quantity, String reference, String reason) {
+        Product product = productRepository.findByIdAndIsActiveTrue(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
+        BigDecimal delta = quantity.abs().negate();
+        return recordInternalMovement(product, MovementType.SALE, delta, reference, reason);
+    }
+
+
     // Internal transactional method for atomic stock update and audit logging
     private StockMovement recordInternalMovement(Product product, MovementType type, BigDecimal quantityDelta, String reference, String reason) {
         BigDecimal newStock = product.getCurrentStock().add(quantityDelta);

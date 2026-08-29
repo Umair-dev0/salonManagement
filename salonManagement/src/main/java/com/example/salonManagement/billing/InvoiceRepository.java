@@ -14,4 +14,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     List<Invoice> findAllByCustomerIdOrderByCreatedAtDesc(Long customerId);
 
     List<Invoice> findAllByOrderByCreatedAtDesc();
+
+    List<Invoice> findAllByCreatedAtBetween(java.time.ZonedDateTime start, java.time.ZonedDateTime end);
 }
+
